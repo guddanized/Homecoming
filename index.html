@@ -1,1 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homecoming — Apocalypse Mode</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --gold:#d4a017;
+  --gold2:#f5c842;
+  --white:#f8f4ed;
+  --glass-dark:rgba(10,15,25,.75);
+  --glass-light:rgba(255,255,255,.7);
+}
+
+body{
+  font-family:'Montserrat',sans-serif;
+  color:var(--white);
+  overflow:hidden;
+  transition:background .6s,color .6s;
+}
+
+/* ================= BACKGROUND ================= */
+
+.bg{
+  position:fixed;
+  inset:-5%;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  transition:all .8s ease;
+  z-index:-2;
+  transform:scale(1.08);
+}
+
+/* DARK THEME */
+body.dark{
+  background:#000;
+  color:#fff;
+}
+
+body.dark .bg{
+  background-image:
+  radial-gradient(circle at 20% 30%,rgba(212,160,23,.15),transparent 40%),
+  url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80');
+  filter:brightness(.45) contrast(1.1);
+}
+
+/* LIGHT THEME */
+body.light{
+  background:#f4f6f9;
+  color:#222;
+}
+
+body.light .bg{
+  background-image:
+  radial-gradient(circle at 80% 30%,rgba(255,200,100,.2),transparent 40%),
+  url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80');
+  filter:brightness(.9) contrast(1);
+}
+
+/* ================= EARTHQUAKE ================= */
+
+@keyframes bgEarthquake{
+  0%{transform:translate(0,0) scale(1.08);}
+  25%{transform:translate(-15px,10px) scale(1.08);}
+  50%{transform:translate(15px,-10px) scale(1.08);}
+  75%{transform:translate(-10px,15px) scale(1.08);}
+  100%{transform:translate(0,0) scale(1.08);}
+}
+
+.bg-earthquake{
+  animation:bgEarthquake .15s infinite;
+}
+
+/* ================= LAYOUT ================= */
+
+.wrapper{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:40px 20px;
+  text-align:center;
+  gap:40px;
+}
+
+.logo{
+  font-family:'Cinzel',serif;
+  font-size:clamp(2rem,5vw,3.5rem);
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  letter-spacing:.15em;
+}
+
+.countdown{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:20px;
+  width:100%;
+  max-width:900px;
+}
+
+.unit{
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  padding:30px;
+  transition:.6s;
+}
+
+body.dark .unit{
+  background:var(--glass-dark);
+  border:1px solid rgba(212,160,23,.4);
+}
+
+body.light .unit{
+  background:var(--glass-light);
+  border:1px solid rgba(0,0,0,.1);
+}
+
+.number{
+  font-family:'Cinzel',serif;
+  font-size:clamp(2.5rem,7vw,4.5rem);
+}
+
+.label{
+  margin-top:10px;
+  font-size:.75rem;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  opacity:.6;
+}
+
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+}
+
+input{
+  padding:12px 18px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  font-size:.9rem;
+}
+
+button{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;
+  padding:12px 24px;
+  border-radius:12px;
+  cursor:pointer;
+  font-family:'Cinzel',serif;
+  font-weight:700;
+}
+
+.theme-toggle{
+  position:fixed;
+  top:20px;
+  right:20px;
+  cursor:pointer;
+  padding:10px 18px;
+  border-radius:20px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-weight:bold;
+  z-index:100;
+}
+
+.expired{
+  font-family:'Cinzel',serif;
+  font-size:clamp(2rem,5vw,3rem);
+  display:none;
+  margin-top:20px;
+}
+
+</style>
+</head>
+
+<body class="dark">
+
+<div class="bg" id="bg"></div>
+
+<div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
+
+<div class="wrapper">
+
+<div class="logo">CHRONOS</div>
+
+<div class="countdown">
+  <div class="unit"><div class="number" id="days">000</div><div class="label">Days</div></div>
+  <div class="unit"><div class="number" id="hours">00</div><div class="label">Hours</div></div>
+  <div class="unit"><div class="number" id="minutes">00</div><div class="label">Minutes</div></div>
+  <div class="unit"><div class="number" id="seconds">00</div><div class="label">Seconds</div></div>
+</div>
+
+<div class="controls">
+  <input type="datetime-local" id="dateInput">
+  <button onclick="setDeadline()">Set Deadline</button>
+</div>
+
+<div class="expired" id="expiredMsg">Time Has Arrived</div>
+
+</div>
+
+<script>
+let targetTime=null;
+let timer=null;
+
+function pad(n,l=2){return String(n).padStart(l,'0')}
+
+function update(){
+  if(!targetTime) return;
+  const diff=targetTime-Date.now();
+
+  if(diff<=0){
+    clearInterval(timer);
+    document.getElementById("expiredMsg").style.display="block";
+    document.getElementById("bg").classList.add("bg-earthquake");
+    return;
+  }
+
+  const total=Math.floor(diff/1000);
+  document.getElementById("days").textContent=pad(Math.floor(total/86400),3);
+  document.getElementById("hours").textContent=pad(Math.floor(total/3600)%24);
+  document.getElementById("minutes").textContent=pad(Math.floor(total/60)%60);
+  document.getElementById("seconds").textContent=pad(total%60);
+}
+
+function setDeadline(){
+  const dateVal=document.getElementById("dateInput").value;
+  if(!dateVal) return alert("Choose date & time");
+
+  targetTime=new Date(dateVal).getTime();
+  clearInterval(timer);
+  timer=setInterval(update,1000);
+  update();
+}
+
+function toggleTheme(){
+  const body=document.body;
+  body.classList.toggle("dark");
+  body.classList.toggle("light");
+}
+</script>
+
+</body>
+</html>
 
