@@ -3,184 +3,203 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guddannnnnn.................... — Apocalypse Mode</title>
+<title>Premium Countdown</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-
-:root{
-  --gold:#d4a017;
-  --gold2:#f5c842;
-  --white:#f8f4ed;
-  --glass-dark:rgba(10,15,25,.75);
-  --glass-light:rgba(255,255,255,.7);
+:root {
+  --gold: #d4a017;
+  --gold-glow: rgba(212, 160, 23, 0.4);
+  --glass-dark: rgba(10, 15, 25, 0.8);
+  --glass-light: rgba(255, 255, 255, 0.8);
+  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-body{
-  font-family:'Montserrat',sans-serif;
-  color:var(--white);
-  overflow:hidden;
-  transition:background .6s,color .6s;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  transition: background 0.5s ease;
 }
 
-/* ================= BACKGROUND ================= */
+body.light { color: #222; }
 
-.bg{
-  position:fixed;
-  inset:-5%;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  transition:all .8s ease;
-  z-index:-2;
-  transform:scale(1.08);
+/* DYNAMIC BACKGROUND */
+.bg {
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.1s ease-out;
 }
 
-/* DARK THEME */
-body.dark{
-  background:#000;
-  color:#fff;
+body.dark .bg { background-image: url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?q=80&w=2070'); filter: brightness(0.4); }
+body.light .bg { background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070'); filter: brightness(0.9); }
+
+/* FLOATING THEME TOGGLE */
+.theme-btn {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--glass-dark);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 20px;
+  z-index: 100;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  transition: var(--transition);
 }
 
-body.dark .bg{
-  background-image:
-  radial-gradient(circle at 20% 30%,rgba(212,160,23,.15),transparent 40%),
-  url('https://images.wallpaperscraft.com/image/single/mountains_night_dark_159806_3840x2400.jpg');
-  filter:brightness(.45) contrast(1.1);
+.theme-btn:hover { transform: scale(1.1) rotate(15deg); }
+
+/* MAIN CONTAINER */
+.container {
+  width: 90%;
+  max-width: 600px;
+  perspective: 1000px;
 }
 
-/* LIGHT THEME */
-body.light{
-  background:#f4f6f9;
-  color:#222;
+.card {
+  position: relative;
+  background: var(--glass-dark);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transform-style: preserve-3d;
 }
 
-body.light .bg{
-  background-image:
-  radial-gradient(circle at 80% 30%,rgba(255,200,100,.2),transparent 40%),
-  url('https://wallup.net/wp-content/uploads/2019/09/643944-landscapes-lakes-mountains-stones-trees-forest-green-snow-sky-clouds-blue-nature-beauty-relax-quiet-2-748x429.jpg');
-  filter:brightness(.9) contrast(1);
+body.light .card { background: var(--glass-light); border: 1px solid rgba(0,0,0,0.05); }
+
+/* BORDER ANIMATION */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 32px;
+  background: linear-gradient(45deg, var(--gold), transparent, var(--gold), transparent);
+  background-size: 400% 400%;
+  z-index: -1;
+  animation: borderRotate 6s linear infinite;
+  opacity: 0.6;
 }
 
-/* ================= EARTHQUAKE ================= */
-
-@keyframes bgEarthquake{
-  0%{transform:translate(0,0) scale(1.08);}
-  25%{transform:translate(-15px,10px) scale(1.08);}
-  50%{transform:translate(15px,-10px) scale(1.08);}
-  75%{transform:translate(-10px,15px) scale(1.08);}
-  100%{transform:translate(0,0) scale(1.08);}
+@keyframes borderRotate {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
-.bg-earthquake{
-  animation:bgEarthquake .15s infinite;
+.title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  margin-bottom: 30px;
+  letter-spacing: 4px;
+  background: linear-gradient(to right, #d4a017, #f5c842, #d4a017);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s infinite linear;
 }
 
-/* ================= LAYOUT ================= */
-
-.wrapper{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  padding:40px 20px;
-  text-align:center;
-  gap:40px;
+/* GRID SYSTEM */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
-.logo{
-  font-family:'Cinzel',serif;
-  font-size:clamp(2rem,5vw,3.5rem);
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  letter-spacing:.15em;
+.box {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 20px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: transform 0.3s ease;
 }
 
-.countdown{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:20px;
-  width:100%;
-  max-width:900px;
+.box:hover { transform: translateY(-5px); background: rgba(255,255,255,0.08); }
+
+.num {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 0 15px var(--gold-glow);
 }
 
-.unit{
-  backdrop-filter:blur(12px);
-  border-radius:20px;
-  padding:30px;
-  transition:.6s;
+.label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.6;
+  margin-top: 8px;
 }
 
-body.dark .unit{
-  background:var(--glass-dark);
-  border:1px solid rgba(212,160,23,.4);
+/* INPUT SECTION */
+.setup-trigger {
+  color: var(--gold);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
 
-body.light .unit{
-  background:var(--glass-light);
-  border:1px solid rgba(0,0,0,.1);
+.controls {
+  margin-top: 20px;
+  display: none; /* Hidden by default */
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.5s ease;
 }
 
-.number{
-  font-family:'Cinzel',serif;
-  font-size:clamp(2.5rem,7vw,4.5rem);
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+input {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.1);
+  color: inherit;
+  font-family: inherit;
+  text-align: center;
 }
 
-.label{
-  margin-top:10px;
-  font-size:.75rem;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  opacity:.6;
+button {
+  padding: 12px 25px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--gold), #f5c842);
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
 }
 
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:15px;
-  justify-content:center;
-}
+button:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--gold-glow); }
 
-input{
-  padding:12px 18px;
-  border-radius:12px;
-  border:1px solid #ccc;
-  font-size:.9rem;
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 500px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .card { padding: 30px 15px; }
 }
-
-button{
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  border:none;
-  padding:12px 24px;
-  border-radius:12px;
-  cursor:pointer;
-  font-family:'Cinzel',serif;
-  font-weight:700;
-}
-
-.theme-toggle{
-  position:fixed;
-  top:20px;
-  right:20px;
-  cursor:pointer;
-  padding:10px 18px;
-  border-radius:20px;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  font-weight:bold;
-  z-index:100;
-}
-
-.expired{
-  font-family:'Cinzel',serif;
-  font-size:clamp(2rem,5vw,3rem);
-  display:none;
-  margin-top:20px;
-}
-
 </style>
 </head>
 
@@ -188,69 +207,133 @@ button{
 
 <div class="bg" id="bg"></div>
 
-<div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
+<div class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌓</div>
 
-<div class="wrapper">
+<div class="container" id="scene">
+  <div class="card" id="card">
+    <h1 class="title">EVENT CLOCK</h1>
+    
+    <div class="grid">
+      <div class="box"><span id="days" class="num">00</span><div class="label">Days</div></div>
+      <div class="box"><span id="hours" class="num">00</span><div class="label">Hours</div></div>
+      <div class="box"><span id="mins" class="num">00</span><div class="label">Mins</div></div>
+      <div class="box"><span id="secs" class="num">00</span><div class="label">Secs</div></div>
+    </div>
 
-<div class="logo">CHRONOS</div>
+    <p class="setup-trigger" onclick="toggleControls()">Set Custom Date</p>
+    
+    <div class="controls" id="controls">
+      <input type="datetime-local" id="dateInput">
+      <button onclick="saveDate()">START COUNTDOWN</button>
+    </div>
 
-<div class="countdown">
-  <div class="unit"><div class="number" id="days">000</div><div class="label">Days</div></div>
-  <div class="unit"><div class="number" id="hours">00</div><div class="label">Hours</div></div>
-  <div class="unit"><div class="number" id="minutes">00</div><div class="label">Minutes</div></div>
-  <div class="unit"><div class="number" id="seconds">00</div><div class="label">Seconds</div></div>
-</div>
-
-<div class="controls">
-  <input type="datetime-local" id="dateInput">
-  <button onclick="setDeadline()">Set Deadline</button>
-</div>
-
-<div class="expired" id="expiredMsg">Time Has Arrived</div>
-
+    <div id="message" style="margin-top: 20px; font-family: 'Cinzel'; display: none; color: var(--gold);">
+      THE TIME HAS COME
+    </div>
+  </div>
 </div>
 
 <script>
-let targetTime=null;
-let timer=null;
+let countdownInterval;
 
-function pad(n,l=2){return String(n).padStart(l,'0')}
+// Initialize from LocalStorage
+window.onload = () => {
+  const savedDate = localStorage.getItem('targetDate');
+  if (savedDate) {
+    startCountdown(parseInt(savedDate));
+  }
+  
+  // Auto Dark Mode detection
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    toggleTheme();
+  }
+};
 
-function update(){
-  if(!targetTime) return;
-  const diff=targetTime-Date.now();
+function toggleControls() {
+  const c = document.getElementById('controls');
+  c.style.display = (c.style.display === 'flex') ? 'none' : 'flex';
+}
 
-  if(diff<=0){
-    clearInterval(timer);
-    document.getElementById("expiredMsg").style.display="block";
-    document.getElementById("bg").classList.add("bg-earthquake");
-    return;
+function saveDate() {
+  const val = document.getElementById('dateInput').value;
+  if (!val) return;
+  
+  const target = new Date(val).getTime();
+  localStorage.setItem('targetDate', target);
+  startCountdown(target);
+  toggleControls();
+}
+
+function startCountdown(target) {
+  clearInterval(countdownInterval);
+  
+  function update() {
+    const now = new Date().getTime();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('message').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('message').style.display = 'none';
+    
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    animateValue('days', d);
+    animateValue('hours', h);
+    animateValue('mins', m);
+    animateValue('secs', s);
   }
 
-  const total=Math.floor(diff/1000);
-  document.getElementById("days").textContent=pad(Math.floor(total/86400),3);
-  document.getElementById("hours").textContent=pad(Math.floor(total/3600)%24);
-  document.getElementById("minutes").textContent=pad(Math.floor(total/60)%60);
-  document.getElementById("seconds").textContent=pad(total%60);
-}
-
-function setDeadline(){
-  const dateVal=document.getElementById("dateInput").value;
-  if(!dateVal) return alert("Choose date & time");
-
-  targetTime=new Date(dateVal).getTime();
-  clearInterval(timer);
-  timer=setInterval(update,1000);
   update();
+  countdownInterval = setInterval(update, 1000);
 }
 
-function toggleTheme(){
-  const body=document.body;
-  body.classList.toggle("dark");
-  body.classList.toggle("light");
+// Smooth number updates
+function animateValue(id, value) {
+  const el = document.getElementById(id);
+  const formatted = String(value).padStart(id === 'days' ? 3 : 2, '0');
+  if (el.textContent !== formatted) {
+    el.style.transform = 'scale(1.2)';
+    el.style.opacity = '0.5';
+    setTimeout(() => {
+      el.textContent = formatted;
+      el.style.transform = 'scale(1)';
+      el.style.opacity = '1';
+    }, 150);
+  }
 }
+
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  document.body.classList.toggle('dark');
+  const btn = document.querySelector('.theme-btn');
+  btn.innerHTML = document.body.classList.contains('light') ? '🌙' : '☀️';
+}
+
+// MOUSE PARALLAX EFFECT
+const scene = document.getElementById('scene');
+const card = document.getElementById('card');
+const bg = document.getElementById('bg');
+
+document.addEventListener('mousemove', (e) => {
+  const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+  const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+  
+  card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+  bg.style.transform = `scale(1.1) translate(${xAxis * 2}px, ${yAxis * 2}px)`;
+});
+
+// Reset card on mouse leave
+document.addEventListener('mouseleave', () => {
+  card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+});
 </script>
 
 </body>
 </html>
-
