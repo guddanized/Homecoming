@@ -1,339 +1,586 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Premium Countdown</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Personal Ramadan Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+        :root {
+            --gold: #F0C060;
+            --gold-light: #FFE08A;
+            --teal: #0D7A6A;
+            --teal-light: #14B8A6;
+            --violet: #6D28D9;
+            --rose: #BE185D;
+            --ivory: #FFFDF5;
+            --deep-navy: #0B1437;
+        }
 
-<style>
-:root {
-  --gold: #d4a017;
-  --gold-glow: rgba(212, 160, 23, 0.4);
-  --glass-dark: rgba(10, 15, 25, 0.8);
-  --glass-light: rgba(255, 255, 255, 0.8);
-  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background: #000000;
+        }
 
-body {
-  font-family: 'Montserrat', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  color: #fff;
-  transition: background 0.5s ease;
-}
+        /* ── Glassmorphism base ── */
+        .glass {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border: 1px solid rgba(255,255,255,0.13);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
 
-body.light { color: #222; }
+        .glass-gold {
+            background: linear-gradient(135deg, rgba(240,192,96,0.12), rgba(255,224,138,0.06));
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border: 1px solid rgba(240,192,96,0.3);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(240,192,96,0.1) inset, inset 0 1px 0 rgba(255,255,255,0.2);
+        }
 
-/* DYNAMIC BACKGROUND */
-.bg {
-  position: fixed;
-  inset: -10%;
-  z-index: -1;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.1s ease-out;
-}
+        .glass-teal {
+            background: linear-gradient(135deg, rgba(13,122,106,0.2), rgba(20,184,166,0.1));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(20,184,166,0.3);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
 
-body.dark .bg { background-image: url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?q=80&w=2070'); filter: brightness(0.4); }
-body.light .bg { background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070'); filter: brightness(0.9); }
+        .glass-violet {
+            background: linear-gradient(135deg, rgba(109,40,217,0.2), rgba(139,92,246,0.08));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(139,92,246,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
 
-/* FLOATING THEME TOGGLE */
-.theme-btn {
-  position: absolute;
-  top: 25px;
-  right: 25px;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: var(--glass-dark);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
-  font-size: 20px;
-  z-index: 100;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-  transition: var(--transition);
-}
+        /* ── Calligraphy ── */
+        .calligraphy {
+            font-family: 'Amiri', serif;
+        }
 
-.theme-btn:hover { transform: scale(1.1) rotate(15deg); }
+        /* ── Title gradient text ── */
+        .title-gradient {
+            background: linear-gradient(135deg, #F0C060 0%, #FFE08A 40%, #E8B860 70%, #C69F40 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-/* MAIN CONTAINER */
-.container {
-  width: 90%;
-  max-width: 600px;
-  perspective: 1000px;
-}
+        /* ── Lantern glow ── */
+        @keyframes lanternGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px #F0C060) drop-shadow(0 0 20px #C69F40); opacity: 1; }
+            50%       { filter: drop-shadow(0 0 16px #FFE08A) drop-shadow(0 0 40px #F0C060); opacity: 0.85; }
+        }
+        .lantern-glow { animation: lanternGlow 3s ease-in-out infinite; }
 
-.card {
-  position: relative;
-  background: var(--glass-dark);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px;
-  padding: 40px 20px;
-  text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  transform-style: preserve-3d;
-}
+        /* ── Countdown digits ── */
+        .countdown-digit {
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+            font-size: clamp(3rem, 8vw, 5rem);
+            background: linear-gradient(180deg, #FFE08A 0%, #C69F40 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            text-shadow: none;
+        }
 
-body.light .card { background: var(--glass-light); border: 1px solid rgba(0,0,0,0.05); }
+        .colon {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            color: rgba(240,192,96,0.5);
+            line-height: 1;
+            padding-bottom: 4px;
+        }
 
-/* BORDER ANIMATION */
-.card::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 32px;
-  background: linear-gradient(45deg, var(--gold), transparent, var(--gold), transparent);
-  background-size: 400% 400%;
-  z-index: -1;
-  animation: borderRotate 6s linear infinite;
-  opacity: 0.6;
-}
+        /* ── Dua card ── */
+        .dua-arabic {
+            font-family: 'Amiri', serif;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            line-height: 2;
+            color: #FFE08A;
+            text-shadow: 0 0 20px rgba(240,192,96,0.4);
+            direction: rtl;
+        }
 
-@keyframes borderRotate {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
+        /* ── Progress ring ── */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
 
-.title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(1.8rem, 5vw, 2.8rem);
-  margin-bottom: 30px;
-  letter-spacing: 4px;
-  background: linear-gradient(to right, #d4a017, #f5c842, #d4a017);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine 3s infinite linear;
-}
+        /* ── Table ── */
+        .ramadan-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
 
-/* GRID SYSTEM */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  margin-bottom: 30px;
-}
+        .ramadan-table thead tr {
+            background: linear-gradient(90deg, rgba(109,40,217,0.6), rgba(13,122,106,0.6));
+        }
 
-.box {
-  background: rgba(255, 255, 255, 0.03);
-  padding: 20px 10px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.05);
-  transition: transform 0.3s ease;
-}
+        .ramadan-table th {
+            padding: 1rem 1.25rem;
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(240,192,96,0.3);
+        }
 
-.box:hover { transform: translateY(-5px); background: rgba(255,255,255,0.08); }
+        .ramadan-table td {
+            padding: 0.8rem 1.25rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
 
-.num {
-  display: block;
-  font-family: 'Cinzel', serif;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  font-weight: 700;
-  color: var(--gold);
-  text-shadow: 0 0 15px var(--gold-glow);
-}
+        .ramadan-table tbody tr {
+            background: rgba(255,255,255,0.02);
+            transition: all 0.2s ease;
+        }
 
-.label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  opacity: 0.6;
-  margin-top: 8px;
-}
+        .ramadan-table tbody tr:nth-child(even) {
+            background: rgba(255,255,255,0.04);
+        }
 
-/* INPUT SECTION */
-.setup-trigger {
-  color: var(--gold);
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
+        .ramadan-table tbody tr:hover {
+            background: rgba(240,192,96,0.08) !important;
+            transform: translateX(2px);
+        }
 
-.controls {
-  margin-top: 20px;
-  display: none; /* Hidden by default */
-  flex-direction: column;
-  gap: 10px;
-  animation: fadeIn 0.5s ease;
-}
+        .current-row {
+            background: linear-gradient(90deg, rgba(13,122,106,0.25), rgba(20,184,166,0.1)) !important;
+            border-left: 3px solid #14B8A6;
+            position: relative;
+        }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .current-row td {
+            color: #FFE08A !important;
+            font-weight: 600;
+        }
 
-input {
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  background: rgba(255,255,255,0.1);
-  color: inherit;
-  font-family: inherit;
-  text-align: center;
-}
+        .time-am {
+            font-size: 0.65em;
+            font-weight: 700;
+            color: #60A5FA;
+            margin-left: 2px;
+        }
+        .time-pm {
+            font-size: 0.65em;
+            font-weight: 700;
+            color: #F87171;
+            margin-left: 2px;
+        }
 
-button {
-  padding: 12px 25px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, var(--gold), #f5c842);
-  color: #000;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition);
-}
+        /* ── Event badge ── */
+        .event-badge {
+            display: inline-block;
+            padding: 0.25rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
 
-button:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--gold-glow); }
+        /* ── Scrollbar ── */
+        .table-scroll::-webkit-scrollbar { width: 4px; }
+        .table-scroll::-webkit-scrollbar-track { background: transparent; }
+        .table-scroll::-webkit-scrollbar-thumb { background: rgba(240,192,96,0.3); border-radius: 2px; }
 
-/* MOBILE RESPONSIVENESS */
-@media (max-width: 500px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-  .card { padding: 30px 15px; }
-}
-</style>
+        /* ── Animation for today's row pulse ── */
+        @keyframes rowPulse {
+            0%, 100% { box-shadow: inset 0 0 0 0 rgba(20,184,166,0); }
+            50%       { box-shadow: inset 0 0 20px 0 rgba(20,184,166,0.1); }
+        }
+        .current-row { animation: rowPulse 3s ease-in-out infinite; }
+
+        /* ── Fluid ribbon decorations ── */
+        .fluid-ribbon {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(2px);
+        }
+        .ribbon-tl {
+            top: -80px;
+            left: -80px;
+            width: clamp(300px, 40vw, 500px);
+            height: clamp(300px, 40vw, 500px);
+            animation: ribbonFloat 20s ease-in-out infinite alternate;
+        }
+        .ribbon-br {
+            bottom: -100px;
+            right: -80px;
+            width: clamp(320px, 42vw, 520px);
+            height: clamp(320px, 42vw, 520px);
+            animation: ribbonFloat 26s ease-in-out infinite alternate-reverse;
+        }
+        .ribbon-mid {
+            top: 15%;
+            right: -20px;
+            width: clamp(180px, 22vw, 300px);
+            height: clamp(360px, 50vw, 600px);
+            animation: ribbonFloat 32s ease-in-out infinite alternate;
+            opacity: 0.6;
+        }
+        @keyframes ribbonFloat {
+            0%   { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+            33%  { transform: translate(12px, -18px) rotate(1.5deg) scale(1.02); }
+            66%  { transform: translate(-8px, 10px) rotate(-1deg) scale(0.99); }
+            100% { transform: translate(6px, -8px) rotate(2deg) scale(1.01); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .countdown-digit { font-size: 2.2rem; }
+            .colon { font-size: 1.8rem; }
+            .ribbon-tl { width: 180px; height: 180px; top: -40px; left: -40px; }
+            .ribbon-br { width: 180px; height: 180px; bottom: -40px; right: -40px; }
+            .ribbon-mid { display: none; }
+            .dua-arabic { font-size: 1.2rem; line-height: 1.8; }
+            .ramadan-table th { padding: 0.6rem 0.75rem; font-size: 0.6rem; }
+            .ramadan-table td { padding: 0.55rem 0.75rem; font-size: 0.8rem; }
+        }
+    </style>
 </head>
+<body>
 
-<body class="dark">
+    <!-- Moon decoration -->
+    <svg style="display:none"></svg>
 
-<div class="bg" id="bg"></div>
+    <!-- Fluid ribbon decorations (inspired by reference) -->
+    <svg class="fluid-ribbon ribbon-tl" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M-60 80 C 40 20, 160 60, 200 160 C 240 260, 180 340, 260 380 C 300 400, 360 370, 380 300"
+              stroke="url(#ribbonGradTL)" stroke-width="90" stroke-linecap="round" fill="none" opacity="0.55"/>
+        <defs>
+            <linearGradient id="ribbonGradTL" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F4845F"/>
+                <stop offset="50%" stop-color="#E8736A"/>
+                <stop offset="100%" stop-color="#C45C7A"/>
+            </linearGradient>
+        </defs>
+    </svg>
 
-<div class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">🌓</div>
+    <svg class="fluid-ribbon ribbon-br" viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M480 380 C 380 460, 240 400, 210 300 C 180 200, 260 130, 200 50 C 170 10, 100 0, 60 40"
+              stroke="url(#ribbonGradBR)" stroke-width="95" stroke-linecap="round" fill="none" opacity="0.5"/>
+        <defs>
+            <linearGradient id="ribbonGradBR" x1="100%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#A855F7"/>
+                <stop offset="45%" stop-color="#C084FC"/>
+                <stop offset="100%" stop-color="#D8A8FA"/>
+            </linearGradient>
+        </defs>
+    </svg>
 
-<div class="container" id="scene">
-  <div class="card" id="card">
-    <h1 class="title">EVENT CLOCK</h1>
-    
-    <div class="grid">
-      <div class="box"><span id="days" class="num">00</span><div class="label">Days</div></div>
-      <div class="box"><span id="hours" class="num">00</span><div class="label">Hours</div></div>
-      <div class="box"><span id="mins" class="num">00</span><div class="label">Mins</div></div>
-      <div class="box"><span id="secs" class="num">00</span><div class="label">Secs</div></div>
+    <svg class="fluid-ribbon ribbon-mid" viewBox="0 0 300 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M320 10 C 260 80, 280 200, 220 280 C 160 360, 80 360, 60 450 C 40 520, 100 580, 160 590"
+              stroke="url(#ribbonGradMid)" stroke-width="70" stroke-linecap="round" fill="none" opacity="0.3"/>
+        <defs>
+            <linearGradient id="ribbonGradMid" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#F0C060"/>
+                <stop offset="100%" stop-color="#F4845F"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Page content -->
+    <div class="relative z-10 px-4 py-4 md:p-10 flex flex-col items-center min-h-screen">
+
+        <!-- Header -->
+        <header class="text-center w-full max-w-7xl mb-4 md:mb-10">
+            <div class="inline-block glass rounded-2xl px-4 py-3 md:px-8 md:py-5 mb-2 md:mb-4">
+                <p class="calligraphy text-sm md:text-lg text-amber-300/70 mb-0.5 tracking-widest">رَمَضَان كَرِيم</p>
+                <h1 class="calligraphy title-gradient text-3xl md:text-7xl font-bold leading-tight">
+                    Ramadan Kareem
+                </h1>
+                <p class="text-white/40 text-xs md:text-sm mt-1 md:mt-2 tracking-widest uppercase font-light">1447 AH · Your Personal Companion</p>
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main class="w-full max-w-7xl flex flex-col lg:flex-row gap-4 md:gap-6">
+
+            <!-- Left panel -->
+            <section class="lg:w-2/5 flex flex-col gap-3 md:gap-5">
+
+                <!-- Countdown card -->
+                <div class="glass-gold rounded-3xl p-4 md:p-7 relative overflow-hidden">
+                    <!-- Decorative corner light -->
+                    <div class="absolute top-0 right-0 w-32 h-32 rounded-full"
+                         style="background: radial-gradient(circle at top right, rgba(240,192,96,0.25), transparent 70%); pointer-events:none;"></div>
+
+                    <div class="flex justify-between items-start mb-3 md:mb-5">
+                        <div>
+                            <span class="event-badge"
+                                  style="background: rgba(240,192,96,0.15); border: 1px solid rgba(240,192,96,0.35); color: #F0C060;">
+                                ⏳ Countdown
+                            </span>
+                            <p class="text-white/50 text-xs uppercase tracking-widest font-semibold">Next Prayer</p>
+                            <h2 class="calligraphy text-2xl md:text-3xl font-bold text-amber-300 mt-1" id="eventTitle">Iftar</h2>
+                        </div>
+                        <svg class="w-10 h-10 md:w-14 md:h-14 lantern-glow flex-shrink-0" viewBox="0 0 100 100" fill="none">
+                            <circle cx="50" cy="50" r="45" fill="rgba(253,243,225,0.08)" stroke="#D3AC4E" stroke-width="1.5"/>
+                            <path d="M50 15V22M40 30L50 15L60 30M50 22C45 22 40 26 40 31M50 22C55 22 60 26 60 31V75M40 31V75M35 80H65M30 85H70M50 75C55 75 60 71 60 66M50 75C45 75 40 71 40 66"
+                                  stroke="#F0C060" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="50" cy="47" r="8" fill="#F0C060" opacity="0.6"/>
+                        </svg>
+                    </div>
+
+                    <!-- Timer display -->
+                    <div class="flex items-center justify-center gap-1 mb-3 md:mb-8 py-3 md:py-4"
+                         style="background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px solid rgba(240,192,96,0.15);">
+                        <span class="countdown-digit" id="timerHH">00</span>
+                        <span class="colon">:</span>
+                        <span class="countdown-digit" id="timerMM">00</span>
+                        <span class="colon">:</span>
+                        <span class="countdown-digit" id="timerSS">00</span>
+                    </div>
+
+                    <!-- Today's times -->
+                    <div class="grid grid-cols-2 gap-2 md:gap-3 mb-3 md:mb-5">
+                        <div class="rounded-2xl p-2 md:p-3 text-center"
+                             style="background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2);">
+                            <p class="text-xs text-blue-300/70 uppercase tracking-widest font-semibold mb-1">🌅 Sehr</p>
+                            <p class="text-blue-200 font-bold text-base md:text-lg" id="todaySehr">—</p>
+                            <p class="text-blue-300/50 text-xs">AM</p>
+                        </div>
+                        <div class="rounded-2xl p-2 md:p-3 text-center"
+                             style="background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2);">
+                            <p class="text-xs text-rose-300/70 uppercase tracking-widest font-semibold mb-1">🌇 Iftar</p>
+                            <p class="text-rose-200 font-bold text-base md:text-lg" id="todayIftar">—</p>
+                            <p class="text-rose-300/50 text-xs">PM</p>
+                        </div>
+                    </div>
+
+                    <!-- Dua -->
+                    <div class="rounded-2xl p-3 md:p-5" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(240,192,96,0.18);">
+                        <p class="calligraphy text-amber-300 text-sm md:text-base font-bold mb-2 md:mb-3 flex items-center gap-2">
+                            <span>📿</span> Dua at Iftar
+                        </p>
+                        <p class="dua-arabic text-right mb-2 md:mb-3">
+                            اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَيْكَ تَوَكَّلْتُ وَعَلَىٰ رِزْقِكَ أَفْطَرْتُ
+                        </p>
+                        <p class="text-white/50 text-xs leading-relaxed italic">
+                            "O Allah, I fasted for You, I believe in You, I put my trust in You, and with Your provision I break my fast."
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Progress card -->
+                <div class="glass-teal rounded-3xl p-4 md:p-6 flex items-center gap-4 md:gap-6">
+                    <div class="relative flex-shrink-0">
+                        <svg width="80" height="80" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r="32" stroke="rgba(20,184,166,0.2)" stroke-width="6" fill="none"/>
+                            <circle cx="40" cy="40" r="32"
+                                    stroke="url(#ringGrad)"
+                                    stroke-width="6"
+                                    stroke-dasharray="201"
+                                    stroke-dashoffset="201"
+                                    stroke-linecap="round"
+                                    fill="none"
+                                    class="progress-ring__circle"
+                                    id="progressCircle"
+                                    transform="rotate(-90 40 40)"/>
+                            <defs>
+                                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#F0C060"/>
+                                    <stop offset="100%" stop-color="#14B8A6"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-white font-bold text-sm" id="nightNum">1</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-teal-300/60 text-xs uppercase tracking-widest font-semibold mb-1">Ramadan Progress</p>
+                        <p class="text-white font-bold text-xl" id="nightLabel">Night 1 of 30</p>
+                        <p class="text-teal-300/60 text-xs mt-1" id="daysLeft">29 nights remaining</p>
+                        <div class="mt-2 rounded-full overflow-hidden h-1.5" style="background: rgba(20,184,166,0.15); width: 140px;">
+                            <div class="h-full rounded-full" id="progressBar"
+                                 style="background: linear-gradient(90deg, #F0C060, #14B8A6); width: 3%; transition: width 1s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Right panel: Schedule table -->
+            <section class="lg:w-3/5">
+                <div class="glass rounded-3xl overflow-hidden" style="border: 1px solid rgba(240,192,96,0.2);">
+                    <div class="px-4 md:px-6 py-3 md:py-4 flex items-center justify-between"
+                         style="background: linear-gradient(90deg, rgba(109,40,217,0.4), rgba(13,122,106,0.4)); border-bottom: 1px solid rgba(240,192,96,0.2);">
+                        <h3 class="calligraphy text-amber-300 text-base md:text-xl font-bold">🗓 Prayer Schedule 1447 AH</h3>
+                        <span class="text-white/40 text-xs">Ramadan 2026</span>
+                    </div>
+                    <div class="table-scroll overflow-y-auto" style="max-height: min(50vh, 400px);">
+                        <table class="ramadan-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Date</th>
+                                    <th>🌅 Sehr</th>
+                                    <th>🌇 Iftar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-4 md:mt-10 text-center text-white/20 text-xs tracking-widest">
+            ✦ &nbsp; رمضان مبارك &nbsp; ✦
+        </footer>
+
     </div>
 
-    <p class="setup-trigger" onclick="toggleControls()">Set Custom Date</p>
-    
-    <div class="controls" id="controls">
-      <input type="datetime-local" id="dateInput">
-      <button onclick="saveDate()">START COUNTDOWN</button>
-    </div>
+    <script>
+        // ── Schedule data ──
+        const schedule = [
+            { date: "19 Feb 2026", sehr: "5:37", iftar: "6:14" },
+            { date: "20 Feb 2026", sehr: "5:36", iftar: "6:15" },
+            { date: "21 Feb 2026", sehr: "5:36", iftar: "6:15" },
+            { date: "22 Feb 2026", sehr: "5:35", iftar: "6:16" },
+            { date: "23 Feb 2026", sehr: "5:34", iftar: "6:17" },
+            { date: "24 Feb 2026", sehr: "5:33", iftar: "6:18" },
+            { date: "25 Feb 2026", sehr: "5:32", iftar: "6:18" },
+            { date: "26 Feb 2026", sehr: "5:31", iftar: "6:19" },
+            { date: "27 Feb 2026", sehr: "5:30", iftar: "6:20" },
+            { date: "28 Feb 2026", sehr: "5:29", iftar: "6:20" },
+            { date: "01 Mar 2026", sehr: "5:28", iftar: "6:21" },
+            { date: "02 Mar 2026", sehr: "5:27", iftar: "6:21" },
+            { date: "03 Mar 2026", sehr: "5:26", iftar: "6:22" },
+            { date: "04 Mar 2026", sehr: "5:25", iftar: "6:23" },
+            { date: "05 Mar 2026", sehr: "5:24", iftar: "6:23" },
+            { date: "06 Mar 2026", sehr: "5:23", iftar: "6:24" },
+            { date: "07 Mar 2026", sehr: "5:22", iftar: "6:25" },
+            { date: "08 Mar 2026", sehr: "5:21", iftar: "6:25" },
+            { date: "09 Mar 2026", sehr: "5:20", iftar: "6:26" },
+            { date: "10 Mar 2026", sehr: "5:19", iftar: "6:26" },
+            { date: "11 Mar 2026", sehr: "5:17", iftar: "6:27" },
+            { date: "12 Mar 2026", sehr: "5:16", iftar: "6:28" },
+            { date: "13 Mar 2026", sehr: "5:15", iftar: "6:28" },
+            { date: "14 Mar 2026", sehr: "5:14", iftar: "6:29" },
+            { date: "15 Mar 2026", sehr: "5:13", iftar: "6:29" },
+            { date: "16 Mar 2026", sehr: "5:12", iftar: "6:30" },
+            { date: "17 Mar 2026", sehr: "5:10", iftar: "6:31" },
+            { date: "18 Mar 2026", sehr: "5:09", iftar: "6:31" },
+            { date: "19 Mar 2026", sehr: "5:08", iftar: "6:32" },
+            { date: "20 Mar 2026", sehr: "5:07", iftar: "6:32" }
+        ];
 
-    <div id="message" style="margin-top: 20px; font-family: 'Cinzel'; display: none; color: var(--gold);">
-      THE TIME HAS COME
-    </div>
-  </div>
-</div>
+        // ── Find today ──
+        const today = new Date();
+        let todayIndex = schedule.findIndex(d => {
+            const parts = d.date.split(' ');
+            const sd = new Date(`${parts[1]} ${parts[0]}, ${parts[2]}`);
+            return sd.toDateString() === today.toDateString();
+        });
+        if (todayIndex === -1) todayIndex = 10; // demo fallback: Mar 01
 
-<script>
-let countdownInterval;
+        // ── Update today's cards ──
+        document.getElementById('todaySehr').textContent = schedule[todayIndex].sehr;
+        document.getElementById('todayIftar').textContent = schedule[todayIndex].iftar;
 
-// Initialize from LocalStorage
-window.onload = () => {
-  const savedDate = localStorage.getItem('targetDate');
-  if (savedDate) {
-    startCountdown(parseInt(savedDate));
-  }
-  
-  // Auto Dark Mode detection
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    toggleTheme();
-  }
-};
+        // ── Build table ──
+        const tbody = document.getElementById('scheduleBody');
+        schedule.forEach((day, i) => {
+            const tr = document.createElement('tr');
+            if (i === todayIndex) tr.classList.add('current-row');
+            tr.innerHTML = `
+                <td class="text-left font-semibold" style="color:rgba(255,255,255,${i===todayIndex?'1':'0.75'})">${day.date}${i===todayIndex ? ' <span style="font-size:0.65em;background:rgba(20,184,166,0.25);color:#14B8A6;padding:1px 6px;border-radius:99px;margin-left:4px;font-weight:700;">TODAY</span>' : ''}</td>
+                <td>${day.sehr} <span class="time-am">AM</span></td>
+                <td>${day.iftar} <span class="time-pm">PM</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-function toggleControls() {
-  const c = document.getElementById('controls');
-  c.style.display = (c.style.display === 'flex') ? 'none' : 'flex';
-}
+        // Scroll to today
+        const currentRow = tbody.querySelector('.current-row');
+        if (currentRow) setTimeout(() => currentRow.scrollIntoView({ behavior: 'smooth', block: 'center' }), 600);
 
-function saveDate() {
-  const val = document.getElementById('dateInput').value;
-  if (!val) return;
-  
-  const target = new Date(val).getTime();
-  localStorage.setItem('targetDate', target);
-  startCountdown(target);
-  toggleControls();
-}
+        // ── Progress ring ──
+        const nightNumber = todayIndex + 1;
+        const circumference = 201; // 2π×32
+        const offset = circumference - (nightNumber / 30) * circumference;
+        document.getElementById('progressCircle').style.strokeDashoffset = offset;
+        document.getElementById('nightNum').textContent = nightNumber;
+        document.getElementById('nightLabel').textContent = `Night ${nightNumber} of 30`;
+        document.getElementById('daysLeft').textContent = `${30 - nightNumber} nights remaining`;
+        document.getElementById('progressBar').style.width = `${(nightNumber / 30) * 100}%`;
 
-function startCountdown(target) {
-  clearInterval(countdownInterval);
-  
-  function update() {
-    const now = new Date().getTime();
-    const diff = target - now;
+        // ── Countdown ──
+        const timerHH = document.getElementById('timerHH');
+        const timerMM = document.getElementById('timerMM');
+        const timerSS = document.getElementById('timerSS');
+        const eventTitle = document.getElementById('eventTitle');
 
-    if (diff <= 0) {
-      clearInterval(countdownInterval);
-      document.getElementById('message').style.display = 'block';
-      return;
-    }
+        function parseTime(timeStr, period) {
+            const [h, m] = timeStr.split(':').map(Number);
+            const date = new Date();
+            let hours = h;
+            if (period === 'PM' && hours !== 12) hours += 12;
+            if (period === 'AM' && hours === 12) hours = 0;
+            date.setHours(hours, m, 0, 0);
+            return date;
+        }
 
-    document.getElementById('message').style.display = 'none';
-    
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
+        function updateCountdown() {
+            const now = new Date();
+            const dayData = schedule[todayIndex];
+            const sehrTime = parseTime(dayData.sehr, 'AM');
+            const iftarTime = parseTime(dayData.iftar, 'PM');
 
-    animateValue('days', d);
-    animateValue('hours', h);
-    animateValue('mins', m);
-    animateValue('secs', s);
-  }
+            let target, label;
+            if (now < sehrTime) {
+                target = sehrTime; label = 'Sehr';
+            } else if (now < iftarTime) {
+                target = iftarTime; label = 'Iftar';
+            } else {
+                const nextIdx = Math.min(todayIndex + 1, schedule.length - 1);
+                target = parseTime(schedule[nextIdx].sehr, 'AM');
+                target.setDate(target.getDate() + 1);
+                label = 'Sehr';
+            }
 
-  update();
-  countdownInterval = setInterval(update, 1000);
-}
+            eventTitle.textContent = label;
 
-// Smooth number updates
-function animateValue(id, value) {
-  const el = document.getElementById(id);
-  const formatted = String(value).padStart(id === 'days' ? 3 : 2, '0');
-  if (el.textContent !== formatted) {
-    el.style.transform = 'scale(1.2)';
-    el.style.opacity = '0.5';
-    setTimeout(() => {
-      el.textContent = formatted;
-      el.style.transform = 'scale(1)';
-      el.style.opacity = '1';
-    }, 150);
-  }
-}
+            const diff = Math.max(0, target - now);
+            const hh = Math.floor(diff / 3600000);
+            const mm = Math.floor((diff % 3600000) / 60000);
+            const ss = Math.floor((diff % 60000) / 1000);
 
-function toggleTheme() {
-  document.body.classList.toggle('light');
-  document.body.classList.toggle('dark');
-  const btn = document.querySelector('.theme-btn');
-  btn.innerHTML = document.body.classList.contains('light') ? '🌙' : '☀️';
-}
+            timerHH.textContent = String(hh).padStart(2, '0');
+            timerMM.textContent = String(mm).padStart(2, '0');
+            timerSS.textContent = String(ss).padStart(2, '0');
+        }
 
-// MOUSE PARALLAX EFFECT
-const scene = document.getElementById('scene');
-const card = document.getElementById('card');
-const bg = document.getElementById('bg');
-
-document.addEventListener('mousemove', (e) => {
-  const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-  const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-  
-  card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-  bg.style.transform = `scale(1.1) translate(${xAxis * 2}px, ${yAxis * 2}px)`;
-});
-
-// Reset card on mouse leave
-document.addEventListener('mouseleave', () => {
-  card.style.transform = `rotateY(0deg) rotateX(0deg)`;
-});
-</script>
-
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
 </body>
 </html>
