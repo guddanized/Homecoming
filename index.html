@@ -1,1 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Class Timetable · Black Edition</title>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       ============================================================ */
+    :root {
+      --bg: #000000;
+      --surface: #0D1117;
+      --surface-2: #151B26;
+      --line: #222B3A;
+      --text: #F4F7FC;
+      --text-dim: #8E9BB2;
+      --accent: #6C8CFF;
 
+      --math:  #A9C1FF;
+      --cprog: #8BE8BB;
+      --lab:   #C6A8FF;
+      --evs:   #FFA8BC;
+      --ca:    #FFC97A;
+      --iks:   #7FE0EB;
+      --ge:    #C3CCDD;
+      --snk:   #F5D86A;
+
+      --recess-bg: #1F1508;
+      --recess-fg: #F3D48A;
+
+      --radius-lg: 18px;
+      --radius-md: 14px;
+
+      --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      padding: 28px 18px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .head h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .head h1 span {
+      color: var(--accent);
+    }
+
+    .head p {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .head .badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: 40px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--text-dim);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       LIVE DATE BANNER
+       ============================================================ */
+    .date-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .date-banner::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent);
+    }
+
+    .date-banner .date-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .date-banner .date-main .day-name {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .date-banner .date-main .full-date {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .date-banner .date-side {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .date-banner .date-side .today-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 40px;
+      background: rgba(108, 140, 255, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .date-banner .date-side .time-now {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+
+    /* ============================================================
+       NAVIGATION — day tiles with names only
+       ============================================================ */
+    .day-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .day-tile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 4px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--text-dim);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      font-family: inherit;
+    }
+
+    .day-tile:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .day-tile .label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* small dot indicator for "today" */
+    .day-tile .today-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--tile-accent, var(--accent));
+      box-shadow: 0 0 8px var(--tile-accent, var(--accent));
+      opacity: 0;
+    }
+
+    .day-tile.is-today .today-dot {
+      opacity: 1;
+    }
+
+    /* colored indicator bar at bottom of each tile */
+    .day-tile::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 0;
+      height: 4px;
+      border-radius: 4px 4px 0 0;
+      background: var(--tile-accent, var(--accent));
+      transition: width 0.22s cubic-bezier(0.3, 0.7, 0.4, 1);
+    }
+
+    /* active state */
+    .day-tile.active {
+      background: var(--surface-2);
+      color: var(--text);
+      border-color: var(--tile-accent, var(--accent));
+      box-shadow: 0 8px 20px -10px var(--tile-accent, var(--accent));
+    }
+
+    .day-tile.active::after {
+      width: 70%;
+    }
+
+    .day-tile.active .label {
+      color: var(--tile-accent, var(--accent));
+    }
+
+    .day-tile:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* per-day accent color */
+    .day-tile[data-day="Mon"] { --tile-accent: #7FB2FF; }
+    .day-tile[data-day="Tue"] { --tile-accent: #67E0B0; }
+    .day-tile[data-day="Wed"] { --tile-accent: #B89BFF; }
+    .day-tile[data-day="Thu"] { --tile-accent: #FFA8BC; }
+    .day-tile[data-day="Fri"] { --tile-accent: #FFD27A; }
+
+    /* ============================================================
+       DAY SUMMARY STRIP
+       ============================================================ */
+    .day-strip {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 2px;
+    }
+
+    .day-strip h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .day-strip .meta {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .day-strip .meta b {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ============================================================
+       TIMETABLE — stacked period cards
+       ============================================================ */
+    .schedule {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .period {
+      position: relative;
+      display: flex;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      animation: rise 0.3s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* left color rail */
+    .period::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: var(--tint, var(--accent));
+    }
+
+    /* current-period highlight */
+    .period.is-now {
+      border-color: var(--tint, var(--accent));
+      box-shadow: 0 0 0 1px var(--tint, var(--accent)), 0 6px 24px -8px var(--tint, var(--accent));
+    }
+
+    .period.is-now .slot .pnum::after {
+      content: "•";
+      display: block;
+      color: var(--tint, var(--accent));
+      font-size: 0.7rem;
+      margin-top: 2px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50%      { opacity: 1; }
+    }
+
+    /* left column */
+    .period .slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-width: 52px;
+      padding-top: 2px;
+      border-right: 1px solid var(--line);
+      padding-right: 14px;
+    }
+
+    .period .slot .pnum {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--tint, var(--accent));
+      line-height: 1;
+    }
+
+    .period .slot .ptime {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 5px;
+      line-height: 1.35;
+      white-space: pre-line;
+    }
+
+    /* right column */
+    .period .body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .period .body .subj {
+      font-size: 1.05rem;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .period .body .subj .tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 40px;
+      background: var(--tint, var(--accent));
+      color: #000000;
+      flex-shrink: 0;
+    }
+
+    .period .body .teacher {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .period .body .teacher::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--tint, var(--accent));
+      opacity: 0.8;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       SUBJECT COLORWAYS
+       ============================================================ */
+    .p-math  { --tint: var(--math); }
+    .p-cprog { --tint: var(--cprog); }
+    .p-lab   { --tint: var(--lab); }
+    .p-evs   { --tint: var(--evs); }
+    .p-ca    { --tint: var(--ca); }
+    .p-iks   { --tint: var(--iks); }
+    .p-ge    { --tint: var(--ge); }
+    .p-snk   { --tint: var(--snk); }
+
+    /* recess */
+    .period.recess {
+      background: var(--recess-bg);
+      border-color: #3A2C12;
+    }
+
+    .period.recess::before {
+      background: var(--recess-fg);
+    }
+
+    .period.recess .slot {
+      border-right-color: #3A2C12;
+    }
+
+    .period.recess .slot .pnum {
+      color: var(--recess-fg);
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    .period.recess .slot .ptime {
+      color: #B79A5F;
+    }
+
+    .period.recess .body .subj {
+      color: var(--recess-fg);
+      font-style: italic;
+    }
+
+    .period.recess .body .subj .tag {
+      background: rgba(243, 212, 138, 0.16);
+      color: var(--recess-fg);
+    }
+
+    /* ============================================================
+       FOOTER NOTE
+       ============================================================ */
+    .foot {
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .foot .dot {
+      color: var(--accent);
+    }
+
+    /* ============================================================
+       EMPTY STATE
+       ============================================================ */
+    .empty {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-lg);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 380px) {
+      .app { padding: 20px 14px 40px; }
+      .day-tile .label { font-size: 0.75rem; }
+      .day-tile { padding: 14px 2px; }
+      .period { padding: 14px 14px; gap: 10px; }
+      .period .slot { min-width: 44px; padding-right: 10px; }
+      .period .body .subj { font-size: 0.98rem; }
+      .date-banner { padding: 12px 14px; }
+    }
+
+    @media (min-width: 680px) {
+      .app { max-width: 560px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .period { animation: none; }
+      .day-tile, .day-tile::after { transition: none; }
+      .period.is-now .slot .pnum::after { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ================= HEADER ================= -->
+    <header class="head">
+      <div>
+        <h1>Class <span>Timetable</span></h1>
+        <p>Monday — Friday · 5 periods</p>
+      </div>
+      <span class="badge">BCA · Sem 1</span>
+    </header>
+
+    <!-- ================= LIVE DATE BANNER ================= -->
+    <div class="date-banner" aria-live="polite">
+      <div class="date-main">
+        <span class="day-name" id="liveDayName">—</span>
+        <span class="full-date" id="liveFullDate">—</span>
+      </div>
+      <div class="date-side">
+        <span class="today-tag" id="todayTag">Today</span>
+        <span class="time-now" id="liveTime">—</span>
+      </div>
+    </div>
+
+    <!-- ================= DAY NAVIGATION ================= -->
+    <nav class="day-nav" role="tablist" aria-label="Select weekday">
+      <button type="button" class="day-tile" data-day="Mon" role="tab" aria-selected="false">
+        <span class="today-dot"></span>
+        <span class="label">Mon</span>
+      </button>
+      <button type="button" class="day-tile" data-day="Tue" role="tab" aria-selected="false">
+        <span class="today-dot"></span>
+        <span class="label">Tue</span>
+      </button>
+      <button type="button" class="day-tile" data-day="Wed" role="tab" aria-selected="false">
+        <span class="today-dot"></span>
+        <span class="label">Wed</span>
+      </button>
+      <button type="button" class="day-tile" data-day="Thu" role="tab" aria-selected="false">
+        <span class="today-dot"></span>
+        <span class="label">Thu</span>
+      </button>
+      <button type="button" class="day-tile" data-day="Fri" role="tab" aria-selected="false">
+        <span class="today-dot"></span>
+        <span class="label">Fri</span>
+      </button>
+    </nav>
+
+    <!-- ================= DAY SUMMARY STRIP ================= -->
+    <div class="day-strip">
+      <h2 id="dayTitle">Monday</h2>
+      <div class="meta"><b id="dayCount">4</b> classes</div>
+    </div>
+
+    <!-- ================= SCHEDULE LIST ================= -->
+    <div class="schedule" id="schedule" role="tabpanel" aria-labelledby="dayTitle"></div>
+
+    <!-- ================= FOOTER ================= -->
+    <div class="foot">
+      <span>Periods · 55 min</span>
+      <span><span class="dot">●</span> Recess · 35 min</span>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ============================================================
+         DATA — one object per weekday
+         ============================================================ */
+      const TIMETABLE = {
+        Mon: [
+          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'Mathematics',     teacher: 'Ashish Sir',    type: 'math',  abbr: 'MATH' },
+          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
+          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
+          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'LAB',             teacher: 'Shubham Sir',   type: 'lab',   abbr: 'LAB' },
+          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'EVS',             teacher: 'Mandira Ma’am', type: 'evs',   abbr: 'EVS' }
+        ],
+        Tue: [
+          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'Mathematics',     teacher: 'Ashish Sir',    type: 'math',  abbr: 'MATH' },
+          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
+          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' },
+          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'IKS',             teacher: 'Vijeta Ma’am',  type: 'iks',   abbr: 'IKS' },
+          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' }
+        ],
+        Wed: [
+          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
+          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
+          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'Mathematics',     teacher: 'Ashish Sir',    type: 'math',  abbr: 'MATH' },
+          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'IKS',             teacher: 'Vijeta Ma’am',  type: 'iks',   abbr: 'IKS' },
+          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'EVS',             teacher: 'Mandira Ma’am', type: 'evs',   abbr: 'EVS' }
+        ],
+        Thu: [
+          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'LAB / NF7',       teacher: '',              type: 'lab',   abbr: 'LAB' },
+          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
+          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
+          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' },
+          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'GE',              teacher: 'Keshav Sir',    type: 'ge',    abbr: 'GE' }
+        ],
+        Fri: [
+          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'SNK Language',    teacher: 'Poonam Ma’am',  type: 'snk',   abbr: 'SNK' },
+          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
+          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' },
+          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
+          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'GE',              teacher: 'Keshav Sir',    type: 'ge',    abbr: 'GE' }
+        ]
+      };
+
+      const DAY_FULL = {
+        Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
+        Thu: 'Thursday', Fri: 'Friday'
+      };
+
+      // map JS getDay() index -> our key
+      const JS_DAY_TO_KEY = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri' };
+
+      /* ============================================================
+         DOM REFERENCES
+         ============================================================ */
+      const nav         = document.querySelector('.day-nav');
+      const tiles       = Array.from(document.querySelectorAll('.day-tile'));
+      const dayTitle    = document.getElementById('dayTitle');
+      const dayCount    = document.getElementById('dayCount');
+      const scheduleEl  = document.getElementById('schedule');
+
+      const liveDayName = document.getElementById('liveDayName');
+      const liveFullDate = document.getElementById('liveFullDate');
+      const liveTime    = document.getElementById('liveTime');
+      const todayTag    = document.getElementById('todayTag');
+
+      let activeDay = null;
+
+      /* ============================================================
+         HELPERS
+         ============================================================ */
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function getTodayKey() {
+        return JS_DAY_TO_KEY[new Date().getDay()] || null; // null on Sat/Sun
+      }
+
+      /* ============================================================
+         LIVE DATE + TIME
+         ============================================================ */
+      function updateLiveClock() {
+        const now = new Date();
+
+        // full weekday + date
+        const weekdayLong = now.toLocaleDateString(undefined, { weekday: 'long' });
+        const month = now.toLocaleDateString(undefined, { month: 'short' });
+        const dayNum = now.getDate();
+        const year = now.getFullYear();
+
+        liveDayName.textContent = weekdayLong;
+        liveFullDate.textContent = `${month} ${dayNum}, ${year}`;
+
+        // live time HH:MM
+        liveTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        // weekend note on the tag
+        const todayKey = getTodayKey();
+        if (todayKey) {
+          todayTag.textContent = 'Today';
+          todayTag.style.opacity = '1';
+        } else {
+          todayTag.textContent = 'Weekend';
+          todayTag.style.opacity = '0.7';
+        }
+      }
+
+      /* ============================================================
+         CURRENT PERIOD DETECTION
+         ============================================================ */
+      function toMinutes(hhmm) {
+        const [h, m] = hhmm.split(':').map(Number);
+        return h * 60 + m;
+      }
+
+      function markCurrentPeriod(dayKey) {
+        const now = new Date();
+        const todayKey = getTodayKey();
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+
+        // remove previous "now" markers
+        scheduleEl.querySelectorAll('.period.is-now').forEach(el => el.classList.remove('is-now'));
+
+        // only highlight if viewing today AND it's a weekday
+        if (dayKey !== todayKey) return;
+
+        const rows = TIMETABLE[dayKey] || [];
+        rows.forEach((r, idx) => {
+          const start = toMinutes(r.start);
+          const end = toMinutes(r.end);
+          if (nowMin >= start && nowMin < end) {
+            const cards = scheduleEl.querySelectorAll('.period');
+            if (cards[idx]) cards[idx].classList.add('is-now');
+          }
+        });
+      }
+
+      /* ============================================================
+         RENDER
+         ============================================================ */
+      function renderDay(dayKey) {
+        const rows = TIMETABLE[dayKey];
+        if (!rows) {
+          scheduleEl.innerHTML = '<div class="empty">No schedule available.</div>';
+          return;
+        }
+
+        dayTitle.textContent = DAY_FULL[dayKey] || dayKey;
+        const classCount = rows.filter(r => r.type !== 'recess').length;
+        dayCount.textContent = String(classCount);
+
+        let html = '';
+        rows.forEach((r, i) => {
+          const isRecess = r.type === 'recess';
+          const cls = isRecess ? 'period recess' : `period p-${r.type}`;
+
+          const teacherHtml = (!isRecess && r.teacher)
+            ? `<div class="teacher">${r.teacher}</div>`
+            : '';
+
+          html += `
+            <article class="${cls}" style="animation-delay:${i * 0.04}s">
+              <div class="slot">
+                <span class="pnum">${r.period}</span>
+                <span class="ptime">${r.time}</span>
+              </div>
+              <div class="body">
+                <div class="subj">
+                  <span>${r.subject}</span>
+                  ${r.abbr ? `<span class="tag">${r.abbr}</span>` : ''}
+                </div>
+                ${teacherHtml}
+              </div>
+            </article>
+          `;
+        });
+
+        scheduleEl.innerHTML = html;
+        markCurrentPeriod(dayKey);
+      }
+
+      /* ============================================================
+         STATE
+         ============================================================ */
+      function setActiveDay(dayKey) {
+        if (!TIMETABLE[dayKey]) dayKey = 'Mon';
+        if (dayKey === activeDay) return;
+
+        activeDay = dayKey;
+
+        tiles.forEach(tile => {
+          const on = tile.dataset.day === dayKey;
+          tile.classList.toggle('active', on);
+          tile.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+
+        renderDay(dayKey);
+      }
+
+      /* ============================================================
+         MARK "TODAY" TILE
+         ============================================================ */
+      function markTodayTile() {
+        const todayKey = getTodayKey();
+        tiles.forEach(tile => {
+          tile.classList.toggle('is-today', tile.dataset.day === todayKey);
+        });
+      }
+
+      /* ============================================================
+         EVENT DELEGATION
+         ============================================================ */
+      function bindNav() {
+        if (!nav) return;
+
+        nav.addEventListener('click', (event) => {
+          const tile = event.target.closest('.day-tile');
+          if (!tile) return;
+
+          const day = tile.dataset.day;
+          if (!day || !TIMETABLE[day]) return;
+
+          setActiveDay(day);
+        });
+      }
+
+      /* ============================================================
+         INIT
+         ============================================================ */
+      function init() {
+        updateLiveClock();
+        markTodayTile();
+
+        const todayKey = getTodayKey();
+        const initial = todayKey || 'Mon';
+
+        activeDay = null;
+        setActiveDay(initial);
+        bindNav();
+
+        // keep the clock fresh + re-check current period every 30s
+        setInterval(() => {
+          updateLiveClock();
+          if (activeDay) markCurrentPeriod(activeDay);
+        }, 30000);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
