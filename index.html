@@ -2,563 +2,180 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Class Timetable · Black Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#641c2b">
+  <title>NSU Student Portal | Class & Hostel Timetable</title>
   <style>
-    /* ============================================================
-       DESIGN TOKENS
-       ============================================================ */
-    :root {
-      --bg: #000000;
-      --surface: #0D1117;
-      --surface-2: #151B26;
-      --line: #222B3A;
-      --text: #F4F7FC;
-      --text-dim: #8E9BB2;
-      --accent: #6C8CFF;
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#000; --surface:#0d1117; --surface2:#151b26; --line:#222b3a;
+  --text:#f4f7fc; --muted:#8e9bb2; --accent:#6c8cff;
+  --radius-lg:18px; --radius-md:14px;
+  --font:'DM Sans',system-ui,sans-serif; --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.45;display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+button{font:inherit}
+.app{width:100%;max-width:580px;padding:28px 18px 48px;display:flex;flex-direction:column;gap:20px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.eyebrow{font:500 .62rem var(--mono);letter-spacing:.15em;color:var(--muted);margin-bottom:7px}
+.head h1{font-size:1.75rem;line-height:1.1;letter-spacing:-.04em}
+.head h1 span{color:var(--accent)}
+.head p:last-child{font-size:.82rem;color:var(--muted);margin-top:6px}
+.badge{font:500 .62rem var(--mono);letter-spacing:.08em;padding:7px 10px;border-radius:40px;background:var(--surface);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.date-banner{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--line);position:relative;overflow:hidden}
+.date-banner:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.date-main,.date-side{display:flex;flex-direction:column;gap:2px}.date-name,.day-name{font-weight:700}
+.day-name{font-size:1rem}.full-date,.time-now{font: .68rem var(--mono);letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.date-side{align-items:flex-end}.today-tag{font:600 .6rem var(--mono);padding:3px 8px;border-radius:40px;background:#6c8cff26;color:var(--accent);text-transform:uppercase;letter-spacing:.1em}
+.main-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:5px;background:#090c11;border:1px solid var(--line);border-radius:16px}
+.main-tab{border:1px solid transparent;border-radius:11px;padding:13px 8px;background:transparent;color:var(--muted);font-size:.86rem;font-weight:700;cursor:pointer;transition:.2s}
+.main-tab:hover{background:var(--surface2);color:var(--text)}
+.main-tab.active{background:var(--surface2);border-color:#39496a;color:var(--text);box-shadow:0 5px 18px #0008}
+.main-tab.active .tab-icon{color:var(--accent)}.tab-icon{margin-right:6px;font-size:1rem}
+.day-nav{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+.day-tile{position:relative;display:flex;align-items:center;justify-content:center;padding:14px 2px;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.2s;touch-action:manipulation}
+.day-tile:hover{background:var(--surface2);color:var(--text)}
+.day-tile .label{font-size:.78rem;font-weight:700}
+.day-tile:after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:3px;border-radius:4px 4px 0 0;background:var(--tile-accent,var(--accent));transition:width .2s}
+.day-tile.active{background:var(--surface2);border-color:var(--tile-accent,var(--accent));color:var(--text)}
+.day-tile.active:after{width:65%}.day-tile.active .label{color:var(--tile-accent,var(--accent))}
+.today-dot{position:absolute;top:6px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--tile-accent,var(--accent));opacity:0}
+.day-tile.is-today .today-dot{opacity:1}
+.day-tile[data-day="Mon"]{--tile-accent:#7fb2ff}.day-tile[data-day="Tue"]{--tile-accent:#67e0b0}.day-tile[data-day="Wed"]{--tile-accent:#b89bff}.day-tile[data-day="Thu"]{--tile-accent:#ffa8bc}.day-tile[data-day="Fri"]{--tile-accent:#ffd27a}.day-tile[data-day="Sat"]{--tile-accent:#7fe0eb}.day-tile[data-day="Sun"]{--tile-accent:#f0a7ff}
+.day-strip{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px}
+.day-strip h2{font-size:1.45rem;letter-spacing:-.03em}.meta{font: .65rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.meta b{color:var(--text)}
+.schedule{display:flex;flex-direction:column;gap:10px}
+.period{position:relative;display:flex;gap:14px;padding:16px 18px;border-radius:var(--radius-lg);background:var(--surface);border:1px solid var(--line);overflow:hidden;animation:rise .25s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.period:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--tint,var(--accent))}
+.period .slot{min-width:66px;display:flex;flex-direction:column;align-items:center;border-right:1px solid var(--line);padding:2px 13px 0 0}
+.pnum{font:700 1rem var(--mono);color:var(--tint,var(--accent));line-height:1.2;text-align:center}
+.ptime{font:.58rem var(--mono);color:var(--muted);text-align:center;margin-top:6px;white-space:pre-line;line-height:1.45}
+.period .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.subj{font-size:1rem;font-weight:700;letter-spacing:-.015em;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.tag{font:500 .57rem var(--mono);letter-spacing:.06em;padding:3px 7px;border-radius:30px;background:var(--tint,var(--accent));color:#05070b;flex-shrink:0}
+.detail{font-size:.8rem;color:var(--muted);line-height:1.5}
+.p-math{--tint:#a9c1ff}.p-cprog{--tint:#8be8bb}.p-lab{--tint:#c6a8ff}.p-evs{--tint:#ffa8bc}.p-ca{--tint:#ffc97a}.p-iks{--tint:#7fe0eb}.p-ge{--tint:#c3ccdd}.p-snk{--tint:#f5d86a}
+.p-breakfast{--tint:#ffd27a}.p-lunch{--tint:#67e0b0}.p-snacks{--tint:#c6a8ff}.p-dinner{--tint:#7fb2ff}
+.meal-card .slot{min-width:82px}.meal-card .pnum{font:700 .72rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.meal-card .subj{font-size:1rem}.meal-card .detail{font-size:.82rem}
+.empty{padding:36px 18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius-lg)}
+.foot{display:flex;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px solid var(--line);font:.59rem var(--mono);letter-spacing:.09em;color:var(--muted)}
+.footer-dot{color:var(--accent)}
+@media(max-width:390px){.app{padding:22px 13px 36px;gap:16px}.head h1{font-size:1.5rem}.badge{font-size:.53rem;padding:6px 7px}.day-nav{gap:4px}.day-tile{padding:12px 1px}.day-tile .label{font-size:.7rem}.period{padding:14px 13px;gap:10px}.period .slot{min-width:57px;padding-right:9px}.meal-card .slot{min-width:72px}.subj{font-size:.94rem}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+
+
+/* ===== NSU student portal visual refresh ===== */
+:root{--bg:#f4f2ef;--surface:#fff;--surface2:#faf7f3;--line:#e7e0d9;--text:#25232a;--muted:#77717a;--accent:#7b1e32;--radius-lg:17px;--radius-md:14px;--font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace}
+body{background:radial-gradient(ellipse at 12% 0%,#f7e9e8 0,transparent 38%),linear-gradient(180deg,#f7f6f4,#f0efed);color:var(--text);display:block}
+.app{max-width:1050px;margin:0 auto;padding:28px 28px 50px;gap:20px}
+.university-header{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:18px 24px;background:#fff;border:1px solid #e8e0d9;border-radius:20px;box-shadow:0 8px 28px #3d1d2410;position:relative;overflow:hidden}
+.university-header:after{content:"";position:absolute;left:0;bottom:0;width:100%;height:4px;background:linear-gradient(90deg,#7b1e32 0 70%,#c9a45f 70%)}
+.identity{display:flex;align-items:center;gap:17px;min-width:0}.crest{width:72px;height:82px;flex:0 0 auto;filter:drop-shadow(0 3px 3px #42141c20)}.crest svg{width:100%;height:100%}
+.university-copy .eyebrow{color:#9b7b4a;margin-bottom:4px}.university-name{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.05rem,2.6vw,1.55rem);font-weight:700;letter-spacing:.025em;color:#681d2d;line-height:1.2}.university-place{font-size:.72rem;letter-spacing:.18em;color:#645b59;font-weight:700;margin-top:4px}.university-rule{display:flex;align-items:center;gap:8px;font:500 .54rem var(--mono);letter-spacing:.13em;color:#9a8b7a;margin-top:8px}.university-rule span{height:1px;width:23px;background:#c8ad7c}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:9px}.portal-chip{font:500 .61rem var(--mono);letter-spacing:.1em;color:#6d2637;background:#f7edef;border:1px solid #ecd8dd;border-radius:30px;padding:8px 11px;white-space:nowrap}.portal-chip i{display:inline-block;width:6px;height:6px;background:#4c9b72;border-radius:50%;margin-right:6px;vertical-align:1px}.header-motto{font-family:Georgia,serif;font-style:italic;color:#8a817c;font-size:.85rem}
+.welcome-panel{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:25px 27px;border-radius:20px;background:linear-gradient(115deg,#571827,#7b1e32 62%,#92364a);color:#fff;box-shadow:0 12px 28px #681d2d24}.welcome-panel:before{content:"";position:absolute;width:290px;height:290px;border:1px solid #ffffff18;border-radius:50%;right:8%;top:-205px;box-shadow:0 0 0 24px #ffffff08,0 0 0 48px #ffffff06}.welcome-panel .eyebrow{color:#e4c8bd;margin-bottom:8px}.welcome-panel h1{font-size:clamp(1.65rem,4vw,2.25rem);letter-spacing:-.045em;line-height:1.1}.welcome-panel h1 span{color:#f1d69d}.welcome-panel p:last-child{color:#f0dfe0;font-size:.86rem;margin-top:8px}.welcome-panel .badge{background:#ffffff16;border:1px solid #ffffff35;color:#fff;z-index:1}.welcome-watermark{position:absolute;right:24px;bottom:-35px;font:700 8rem Georgia,serif;color:#ffffff0b;pointer-events:none}
+.date-banner{background:#fff;border-color:#e8e0d9;box-shadow:0 4px 15px #3d1d2408;padding:16px 20px}.date-banner:before{background:#c49a50}.day-name{color:#322c30}.full-date,.time-now{color:#8a8180}.today-tag{background:#f6edf0;color:#7b1e32}.main-nav{background:#eae5e1;border:1px solid #e0d8d2;padding:5px;border-radius:14px}.main-tab{color:#746c6a}.main-tab:hover{background:#fff;color:#671d2e}.main-tab.active{background:#fff;border-color:#e6d8d8;color:#641c2b;box-shadow:0 3px 10px #3d1d2410}.main-tab.active .tab-icon{color:#a77c3e}
+.day-nav{gap:9px}.day-tile{background:#fff;border-color:#e8e0d9;color:#746e70;box-shadow:0 2px 8px #3d1d2407}.day-tile:hover{background:#fbf7f4;color:#651d2d}.day-tile.active{background:#fff;border-color:#9d6672;box-shadow:0 4px 12px #681d2d12}.day-tile.active .label{color:#7b1e32}.day-tile:after{background:#b58a4d}.day-tile[data-day]{--tile-accent:#7b1e32}.day-tile.is-today .today-dot{background:#c49a50}
+.day-strip{padding:5px 2px 0}.day-strip h2{font-size:1.5rem;color:#332a2d}.meta{color:#8a8180}.meta b{color:#7b1e32}.schedule{gap:11px}.period{background:#fff;border-color:#e9e2dc;box-shadow:0 4px 14px #3d1d2408;padding:17px 20px;transition:transform .18s ease,box-shadow .18s ease}.period:hover{transform:translateY(-2px);box-shadow:0 8px 20px #3d1d2413}.period:before{width:4px}.period .slot{border-color:#eee7e2}.pnum{color:#7b1e32}.ptime{color:#8c8380}.subj{color:#30282d}.detail{color:#80777a}.tag{background:#f4e9eb;color:#7b1e32;border:1px solid #ead7dc}.p-math,.p-cprog,.p-lab,.p-evs,.p-ca,.p-iks,.p-ge,.p-snk{--tint:#7b1e32}.p-breakfast,.p-lunch,.p-snacks,.p-dinner{--tint:#7b1e32}.meal-card .tag{background:#f5eee3;color:#795b2d;border-color:#eadfc9}.empty{background:#fff;border-color:#dfd2d0;color:#766d6d}.foot{border-color:#e4dcd5;color:#8c8180}.footer-dot{color:#a57b42}
+@media(min-width:760px){.main-nav{max-width:530px}.day-nav{max-width:650px}.schedule{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}.period{min-height:104px}.meal-card{min-height:100px}}
+@media(max-width:620px){.app{padding:14px 12px 32px;gap:15px}.university-header{padding:14px 14px;gap:8px}.crest{width:54px;height:64px}.identity{gap:10px}.university-name{font-size:1rem}.university-place{font-size:.58rem;letter-spacing:.12em}.university-rule{font-size:.45rem;margin-top:5px}.header-right{display:none}.welcome-panel{padding:20px 18px}.welcome-panel h1{font-size:1.65rem}.welcome-watermark{font-size:6rem;right:10px}.date-banner{padding:13px 16px}.day-nav{gap:5px}.day-tile{padding:12px 1px}.day-tile .label{font-size:.72rem}.schedule{display:flex}.period{padding:15px 15px}.foot{font-size:.53rem}}
+@media(prefers-reduced-motion:reduce){.period:hover{transform:none}}
+
+
+/* ===== Distinct colour system for every timetable section ===== */
+:root{
+  --class-accent:#7b1e32;
+  --meal-accent:#16836b;
+  --math:#4778c7; --cprog:#18845f; --lab:#7954b5; --evs:#258b91;
+  --ca:#c17a24; --iks:#bd5577; --ge:#65758b; --snk:#a27a25;
+  --breakfast:#c17a24; --lunch:#16836b; --snacks:#7954b5; --dinner:#4778c7;
+}
+/* Navigation changes identity with the selected section */
+.app[data-view="class"] .main-tab[data-view="class"].active{
+  background:#7b1e32;color:#fff;border-color:#7b1e32;box-shadow:0 5px 14px #7b1e3228
+}
+.app[data-view="class"] .main-tab[data-view="class"].active .tab-icon{color:#f2d49b}
+.app[data-view="meal"] .main-tab[data-view="meal"].active{
+  background:#16836b;color:#fff;border-color:#16836b;box-shadow:0 5px 14px #16836b2b
+}
+.app[data-view="meal"] .main-tab[data-view="meal"].active .tab-icon{color:#d5f7e9}
+.app[data-view="class"] .welcome-panel{background:linear-gradient(115deg,#571827,#7b1e32 62%,#96394d)}
+.app[data-view="meal"] .welcome-panel{background:linear-gradient(115deg,#105c4e,#16836b 62%,#269b7d)}
+.app[data-view="meal"] .welcome-panel h1 span{color:#c8f1df}
+.app[data-view="meal"] .date-banner:before{background:#16836b}
+.app[data-view="meal"] .today-tag{background:#e3f4ee;color:#16836b}
+.app[data-view="meal"] .footer-dot{color:#16836b}
+.app[data-view="class"] .footer-dot{color:#7b1e32}
+
+/* Subject-specific class cards */
+.period.p-math{--tint:var(--math);--wash:#edf3ff}
+.period.p-cprog{--tint:var(--cprog);--wash:#eaf6f0}
+.period.p-lab{--tint:var(--lab);--wash:#f2edfa}
+.period.p-evs{--tint:var(--evs);--wash:#eaf6f6}
+.period.p-ca{--tint:var(--ca);--wash:#fbf2e7}
+.period.p-iks{--tint:var(--iks);--wash:#faedf2}
+.period.p-ge{--tint:var(--ge);--wash:#eff2f6}
+.period.p-snk{--tint:var(--snk);--wash:#f8f3e6}
+.period.p-recess{--tint:#8b929d;--wash:#f0f1f3}
+
+/* Meal-category cards: each meal has its own recognizable colour */
+.period.p-breakfast{--tint:var(--breakfast);--wash:#fbf2e7}
+.period.p-lunch{--tint:var(--lunch);--wash:#eaf6f0}
+.period.p-snacks{--tint:var(--snacks);--wash:#f2edfa}
+.period.p-dinner{--tint:var(--dinner);--wash:#edf3ff}
+.period{background:linear-gradient(100deg,var(--wash,#fff) 0%,#fff 38%);border-color:color-mix(in srgb,var(--tint,#7b1e32) 19%,#fff);}
+.period:before{background:var(--tint,#7b1e32);width:5px}
+.period .slot{border-right-color:color-mix(in srgb,var(--tint,#7b1e32) 20%,#fff)}
+.period .pnum{color:var(--tint,#7b1e32)}
+.period .tag{background:color-mix(in srgb,var(--tint,#7b1e32) 12%,#fff);color:var(--tint,#7b1e32);border:1px solid color-mix(in srgb,var(--tint,#7b1e32) 25%,#fff)}
+.period:hover{border-color:color-mix(in srgb,var(--tint,#7b1e32) 38%,#fff);box-shadow:0 9px 22px color-mix(in srgb,var(--tint,#7b1e32) 13%,transparent)}
+.day-strip h2{color:#332a2d}
+.app[data-view="meal"] .day-strip h2{color:#146c59}
+.app[data-view="class"] .day-strip h2{color:#7b1e32}
+@media(max-width:620px){.period{background:linear-gradient(100deg,var(--wash,#fff) 0%,#fff 48%)}}
 
-      --math:  #A9C1FF;
-      --cprog: #8BE8BB;
-      --lab:   #C6A8FF;
-      --evs:   #FFA8BC;
-      --ca:    #FFC97A;
-      --iks:   #7FE0EB;
-      --ge:    #C3CCDD;
-      --snk:   #F5D86A;
-
-      --recess-bg: #1F1508;
-      --recess-fg: #F3D48A;
-
-      --radius-lg: 18px;
-      --radius-md: 14px;
-
-      --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      line-height: 1.45;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 520px;
-      padding: 28px 18px 48px;
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-    }
-
-    /* ============================================================
-       HEADER
-       ============================================================ */
-    .head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .head h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-    }
-
-    .head h1 span {
-      color: var(--accent);
-    }
-
-    .head p {
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      margin-top: 4px;
-    }
-
-    .head .badge {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 6px 10px;
-      border-radius: 40px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      color: var(--text-dim);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ============================================================
-       LIVE DATE BANNER
-       ============================================================ */
-    .date-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 18px;
-      border-radius: var(--radius-md);
-      background: var(--surface);
-      border: 1px solid var(--line);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .date-banner::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--accent);
-    }
-
-    .date-banner .date-main {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .date-banner .date-main .day-name {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--text);
-    }
-
-    .date-banner .date-main .full-date {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    .date-banner .date-side {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
-    }
-
-    .date-banner .date-side .today-tag {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 40px;
-      background: rgba(108, 140, 255, 0.15);
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .date-banner .date-side .time-now {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      letter-spacing: 0.02em;
-    }
-
-    /* ============================================================
-       NAVIGATION — day tiles with names only
-       ============================================================ */
-    .day-nav {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
-
-    .day-tile {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 16px 4px;
-      border-radius: var(--radius-md);
-      background: var(--surface);
-      border: 1px solid var(--line);
-      color: var(--text-dim);
-      cursor: pointer;
-      overflow: hidden;
-      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      font-family: inherit;
-    }
-
-    .day-tile:hover {
-      background: var(--surface-2);
-      color: var(--text);
-    }
-
-    .day-tile .label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    /* small dot indicator for "today" */
-    .day-tile .today-dot {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--tile-accent, var(--accent));
-      box-shadow: 0 0 8px var(--tile-accent, var(--accent));
-      opacity: 0;
-    }
-
-    .day-tile.is-today .today-dot {
-      opacity: 1;
-    }
-
-    /* colored indicator bar at bottom of each tile */
-    .day-tile::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: 0;
-      transform: translateX(-50%);
-      width: 0;
-      height: 4px;
-      border-radius: 4px 4px 0 0;
-      background: var(--tile-accent, var(--accent));
-      transition: width 0.22s cubic-bezier(0.3, 0.7, 0.4, 1);
-    }
-
-    /* active state */
-    .day-tile.active {
-      background: var(--surface-2);
-      color: var(--text);
-      border-color: var(--tile-accent, var(--accent));
-      box-shadow: 0 8px 20px -10px var(--tile-accent, var(--accent));
-    }
-
-    .day-tile.active::after {
-      width: 70%;
-    }
-
-    .day-tile.active .label {
-      color: var(--tile-accent, var(--accent));
-    }
-
-    .day-tile:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    /* per-day accent color */
-    .day-tile[data-day="Mon"] { --tile-accent: #7FB2FF; }
-    .day-tile[data-day="Tue"] { --tile-accent: #67E0B0; }
-    .day-tile[data-day="Wed"] { --tile-accent: #B89BFF; }
-    .day-tile[data-day="Thu"] { --tile-accent: #FFA8BC; }
-    .day-tile[data-day="Fri"] { --tile-accent: #FFD27A; }
-
-    /* ============================================================
-       DAY SUMMARY STRIP
-       ============================================================ */
-    .day-strip {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 0 2px;
-    }
-
-    .day-strip h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .day-strip .meta {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    .day-strip .meta b {
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    /* ============================================================
-       TIMETABLE — stacked period cards
-       ============================================================ */
-    .schedule {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .period {
-      position: relative;
-      display: flex;
-      gap: 14px;
-      padding: 16px 18px;
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      border: 1px solid var(--line);
-      overflow: hidden;
-      animation: rise 0.3s ease both;
-    }
-
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* left color rail */
-    .period::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 6px;
-      background: var(--tint, var(--accent));
-    }
-
-    /* current-period highlight */
-    .period.is-now {
-      border-color: var(--tint, var(--accent));
-      box-shadow: 0 0 0 1px var(--tint, var(--accent)), 0 6px 24px -8px var(--tint, var(--accent));
-    }
-
-    .period.is-now .slot .pnum::after {
-      content: "•";
-      display: block;
-      color: var(--tint, var(--accent));
-      font-size: 0.7rem;
-      margin-top: 2px;
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50%      { opacity: 1; }
-    }
-
-    /* left column */
-    .period .slot {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-width: 52px;
-      padding-top: 2px;
-      border-right: 1px solid var(--line);
-      padding-right: 14px;
-    }
-
-    .period .slot .pnum {
-      font-family: var(--font-mono);
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--tint, var(--accent));
-      line-height: 1;
-    }
-
-    .period .slot .ptime {
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.04em;
-      color: var(--text-dim);
-      text-align: center;
-      margin-top: 5px;
-      line-height: 1.35;
-      white-space: pre-line;
-    }
-
-    /* right column */
-    .period .body {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .period .body .subj {
-      font-size: 1.05rem;
-      font-weight: 650;
-      letter-spacing: -0.01em;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .period .body .subj .tag {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      padding: 2px 8px;
-      border-radius: 40px;
-      background: var(--tint, var(--accent));
-      color: #000000;
-      flex-shrink: 0;
-    }
-
-    .period .body .teacher {
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .period .body .teacher::before {
-      content: "";
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--tint, var(--accent));
-      opacity: 0.8;
-      flex-shrink: 0;
-    }
-
-    /* ============================================================
-       SUBJECT COLORWAYS
-       ============================================================ */
-    .p-math  { --tint: var(--math); }
-    .p-cprog { --tint: var(--cprog); }
-    .p-lab   { --tint: var(--lab); }
-    .p-evs   { --tint: var(--evs); }
-    .p-ca    { --tint: var(--ca); }
-    .p-iks   { --tint: var(--iks); }
-    .p-ge    { --tint: var(--ge); }
-    .p-snk   { --tint: var(--snk); }
-
-    /* recess */
-    .period.recess {
-      background: var(--recess-bg);
-      border-color: #3A2C12;
-    }
-
-    .period.recess::before {
-      background: var(--recess-fg);
-    }
-
-    .period.recess .slot {
-      border-right-color: #3A2C12;
-    }
-
-    .period.recess .slot .pnum {
-      color: var(--recess-fg);
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-    }
-
-    .period.recess .slot .ptime {
-      color: #B79A5F;
-    }
-
-    .period.recess .body .subj {
-      color: var(--recess-fg);
-      font-style: italic;
-    }
-
-    .period.recess .body .subj .tag {
-      background: rgba(243, 212, 138, 0.16);
-      color: var(--recess-fg);
-    }
-
-    /* ============================================================
-       FOOTER NOTE
-       ============================================================ */
-    .foot {
-      margin-top: 6px;
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      padding-top: 14px;
-      border-top: 1px solid var(--line);
-    }
-
-    .foot .dot {
-      color: var(--accent);
-    }
-
-    /* ============================================================
-       EMPTY STATE
-       ============================================================ */
-    .empty {
-      padding: 40px 20px;
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 0.95rem;
-      border: 1px dashed var(--line);
-      border-radius: var(--radius-lg);
-    }
-
-    /* ============================================================
-       RESPONSIVE
-       ============================================================ */
-    @media (max-width: 380px) {
-      .app { padding: 20px 14px 40px; }
-      .day-tile .label { font-size: 0.75rem; }
-      .day-tile { padding: 14px 2px; }
-      .period { padding: 14px 14px; gap: 10px; }
-      .period .slot { min-width: 44px; padding-right: 10px; }
-      .period .body .subj { font-size: 0.98rem; }
-      .date-banner { padding: 12px 14px; }
-    }
-
-    @media (min-width: 680px) {
-      .app { max-width: 560px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .period { animation: none; }
-      .day-tile, .day-tile::after { transition: none; }
-      .period.is-now .slot .pnum::after { animation: none; }
-    }
   </style>
 </head>
 <body>
-  <div class="app">
-
-    <!-- ================= HEADER ================= -->
-    <header class="head">
-      <div>
-        <h1>Class <span>Timetable</span></h1>
-        <p>Monday — Friday · 5 periods</p>
+  <main class="app" data-view="class">
+    <header class="university-header">
+      <div class="identity">
+        <div class="crest" aria-label="NSU crest-inspired mark">
+          <svg viewBox="0 0 100 112" role="img" aria-label="NSU Jamshedpur emblem">
+            <path d="M13 8 Q50 -1 87 8 L83 67 Q78 88 50 105 Q22 88 17 67Z" fill="#7b1e32" stroke="#d9b46b" stroke-width="3"/>
+            <path d="M23 17 Q50 11 77 17 L73 64 Q68 80 50 92 Q32 80 27 64Z" fill="none" stroke="#f5e8c8" stroke-width="1.4"/>
+            <text x="50" y="43" text-anchor="middle" fill="#fff8e9" font-size="24" font-family="Georgia" font-weight="bold">NSU</text>
+            <path d="M35 61 Q50 48 65 61 M50 52 L50 75 M42 75 Q50 69 58 75 M39 80 Q50 85 61 80" fill="none" stroke="#e7c477" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M18 67 Q8 52 15 37 M82 67 Q92 52 85 37" fill="none" stroke="#e7c477" stroke-width="2"/>
+            <text x="50" y="101" text-anchor="middle" fill="#fff8e9" font-size="5.5" letter-spacing="1">JAMSHEDPUR</text>
+          </svg>
+        </div>
+        <div class="university-copy">
+          <p class="eyebrow">STUDENT CAMPUS PORTAL</p>
+          <div class="university-name">NETAJI SUBHAS UNIVERSITY</div>
+          <div class="university-place">JAMSHEDPUR · JHARKHAND</div>
+          <div class="university-rule"><span></span> ESTABLISHED 2018 <span></span></div>
+        </div>
       </div>
-      <span class="badge">BCA · Sem 1</span>
+      <div class="header-right"><span class="portal-chip"><i></i> STUDENT RESOURCE</span><span class="header-motto">Campus life, at a glance.</span></div>
     </header>
 
-    <!-- ================= LIVE DATE BANNER ================= -->
-    <div class="date-banner" aria-live="polite">
+    <section class="welcome-panel">
+      <div class="welcome-text">
+        <p class="eyebrow">YOUR CAMPUS. YOUR ROUTINE.</p>
+        <h1 id="pageHeading">Class <span>Timetable</span></h1>
+        <p id="pageSubtitle">Monday — Friday · BCA Semester 1</p>
+      </div>
+      <span class="badge" id="pageBadge">BCA · SEM 1</span>
+      <div class="welcome-watermark">NSU</div>
+    </section>
+
+    <section class="date-banner" aria-live="polite">
       <div class="date-main">
         <span class="day-name" id="liveDayName">—</span>
         <span class="full-date" id="liveFullDate">—</span>
@@ -567,298 +184,191 @@
         <span class="today-tag" id="todayTag">Today</span>
         <span class="time-now" id="liveTime">—</span>
       </div>
-    </div>
+    </section>
 
-    <!-- ================= DAY NAVIGATION ================= -->
-    <nav class="day-nav" role="tablist" aria-label="Select weekday">
-      <button type="button" class="day-tile" data-day="Mon" role="tab" aria-selected="false">
-        <span class="today-dot"></span>
-        <span class="label">Mon</span>
+    <!-- Main navigation: switch between the two timetables -->
+    <nav class="main-nav" role="tablist" aria-label="Choose timetable">
+      <button class="main-tab active" type="button" data-view="class" role="tab" aria-selected="true">
+        <span class="tab-icon">▦</span> Class Timetable
       </button>
-      <button type="button" class="day-tile" data-day="Tue" role="tab" aria-selected="false">
-        <span class="today-dot"></span>
-        <span class="label">Tue</span>
-      </button>
-      <button type="button" class="day-tile" data-day="Wed" role="tab" aria-selected="false">
-        <span class="today-dot"></span>
-        <span class="label">Wed</span>
-      </button>
-      <button type="button" class="day-tile" data-day="Thu" role="tab" aria-selected="false">
-        <span class="today-dot"></span>
-        <span class="label">Thu</span>
-      </button>
-      <button type="button" class="day-tile" data-day="Fri" role="tab" aria-selected="false">
-        <span class="today-dot"></span>
-        <span class="label">Fri</span>
+      <button class="main-tab" type="button" data-view="meal" role="tab" aria-selected="false">
+        <span class="tab-icon">◷</span> Meal Timetable
       </button>
     </nav>
 
-    <!-- ================= DAY SUMMARY STRIP ================= -->
-    <div class="day-strip">
+    <!-- Day navigation is shared by both views -->
+    <nav class="day-nav" role="tablist" aria-label="Select day">
+      <button type="button" class="day-tile" data-day="Mon" role="tab"><span class="today-dot"></span><span class="label">Mon</span></button>
+      <button type="button" class="day-tile" data-day="Tue" role="tab"><span class="today-dot"></span><span class="label">Tue</span></button>
+      <button type="button" class="day-tile" data-day="Wed" role="tab"><span class="today-dot"></span><span class="label">Wed</span></button>
+      <button type="button" class="day-tile" data-day="Thu" role="tab"><span class="today-dot"></span><span class="label">Thu</span></button>
+      <button type="button" class="day-tile" data-day="Fri" role="tab"><span class="today-dot"></span><span class="label">Fri</span></button>
+      <button type="button" class="day-tile" data-day="Sat" role="tab"><span class="today-dot"></span><span class="label">Sat</span></button>
+      <button type="button" class="day-tile" data-day="Sun" role="tab"><span class="today-dot"></span><span class="label">Sun</span></button>
+    </nav>
+
+    <section class="day-strip">
       <h2 id="dayTitle">Monday</h2>
-      <div class="meta"><b id="dayCount">4</b> classes</div>
-    </div>
+      <div class="meta"><b id="dayCount">4</b> <span id="countLabel">classes</span></div>
+    </section>
 
-    <!-- ================= SCHEDULE LIST ================= -->
-    <div class="schedule" id="schedule" role="tabpanel" aria-labelledby="dayTitle"></div>
+    <section class="schedule" id="schedule" role="tabpanel" aria-labelledby="dayTitle"></section>
 
-    <!-- ================= FOOTER ================= -->
-    <div class="foot">
-      <span>Periods · 55 min</span>
-      <span><span class="dot">●</span> Recess · 35 min</span>
-    </div>
-
-  </div>
-
+    <footer class="foot">
+      <span id="footerLeft">CLASS SCHEDULE</span>
+      <span><span class="footer-dot">●</span> <span id="footerRight">BCA · SEM 1</span></span>
+    </footer>
+  </main>
   <script>
-    (function () {
-      'use strict';
+(() => {
+  'use strict';
 
-      /* ============================================================
-         DATA — one object per weekday
-         ============================================================ */
-      const TIMETABLE = {
-        Mon: [
-          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'Mathematics',     teacher: 'Ashish Sir',    type: 'math',  abbr: 'MATH' },
-          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
-          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
-          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'LAB',             teacher: 'Shubham Sir',   type: 'lab',   abbr: 'LAB' },
-          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'EVS',             teacher: 'Mandira Ma’am', type: 'evs',   abbr: 'EVS' }
-        ],
-        Tue: [
-          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'Mathematics',     teacher: 'Ashish Sir',    type: 'math',  abbr: 'MATH' },
-          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
-          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' },
-          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'IKS',             teacher: 'Vijeta Ma’am',  type: 'iks',   abbr: 'IKS' },
-          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' }
-        ],
-        Wed: [
-          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
-          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
-          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'Mathematics',     teacher: 'Ashish Sir',    type: 'math',  abbr: 'MATH' },
-          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'IKS',             teacher: 'Vijeta Ma’am',  type: 'iks',   abbr: 'IKS' },
-          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'EVS',             teacher: 'Mandira Ma’am', type: 'evs',   abbr: 'EVS' }
-        ],
-        Thu: [
-          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'LAB / NF7',       teacher: '',              type: 'lab',   abbr: 'LAB' },
-          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
-          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
-          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' },
-          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'GE',              teacher: 'Keshav Sir',    type: 'ge',    abbr: 'GE' }
-        ],
-        Fri: [
-          { period: '1', start: '12:05', end: '13:00', time: '12:05\n1:00 PM', subject: 'SNK Language',    teacher: 'Poonam Ma’am',  type: 'snk',   abbr: 'SNK' },
-          { period: 'R', start: '13:00', end: '13:35', time: '1:00\n1:35 PM',  subject: 'Recess',          teacher: '',              type: 'recess', abbr: 'BREAK' },
-          { period: '2', start: '13:35', end: '14:30', time: '1:35\n2:30 PM',  subject: 'CA',              teacher: 'Prerna Ma’am',  type: 'ca',    abbr: 'CA' },
-          { period: '3', start: '14:35', end: '15:30', time: '2:35\n3:30 PM',  subject: 'C / Programming', teacher: 'Roshan Sir',    type: 'cprog', abbr: 'C' },
-          { period: '4', start: '15:35', end: '16:30', time: '3:35\n4:30 PM',  subject: 'GE',              teacher: 'Keshav Sir',    type: 'ge',    abbr: 'GE' }
-        ]
-      };
+  const CLASS_TIMETABLE = {
+    Mon:[['1','12:05 – 1:00 PM','Mathematics','Ashish Sir','math','MATH'],['R','1:00 – 1:35 PM','Recess','','recess','BREAK'],['2','1:35 – 2:30 PM','C / Programming','Roshan Sir','cprog','C'],['3','2:35 – 3:30 PM','LAB','Shubham Sir','lab','LAB'],['4','3:35 – 4:30 PM','EVS','Mandira Ma’am','evs','EVS']],
+    Tue:[['1','12:05 – 1:00 PM','Mathematics','Ashish Sir','math','MATH'],['R','1:00 – 1:35 PM','Recess','','recess','BREAK'],['2','1:35 – 2:30 PM','CA','Prerna Ma’am','ca','CA'],['3','2:35 – 3:30 PM','IKS','Vijeta Ma’am','iks','IKS'],['4','3:35 – 4:30 PM','CA','Prerna Ma’am','ca','CA']],
+    Wed:[['1','12:05 – 1:00 PM','C / Programming','Roshan Sir','cprog','C'],['R','1:00 – 1:35 PM','Recess','','recess','BREAK'],['2','1:35 – 2:30 PM','Mathematics','Ashish Sir','math','MATH'],['3','2:35 – 3:30 PM','IKS','Vijeta Ma’am','iks','IKS'],['4','3:35 – 4:30 PM','EVS','Mandira Ma’am','evs','EVS']],
+    Thu:[['1','12:05 – 1:00 PM','LAB / NF7','','lab','LAB'],['R','1:00 – 1:35 PM','Recess','','recess','BREAK'],['2','1:35 – 2:30 PM','C / Programming','Roshan Sir','cprog','C'],['3','2:35 – 3:30 PM','CA','Prerna Ma’am','ca','CA'],['4','3:35 – 4:30 PM','GE','Keshav Sir','ge','GE']],
+    Fri:[['1','12:05 – 1:00 PM','SNK Language','Poonam Ma’am','snk','SNK'],['R','1:00 – 1:35 PM','Recess','','recess','BREAK'],['2','1:35 – 2:30 PM','CA','Prerna Ma’am','ca','CA'],['3','2:35 – 3:30 PM','C / Programming','Roshan Sir','cprog','C'],['4','3:35 – 4:30 PM','GE','Keshav Sir','ge','GE']]
+  };
 
-      const DAY_FULL = {
-        Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
-        Thu: 'Thursday', Fri: 'Friday'
-      };
+  // Menu transcribed from the uploaded hostel food-routine photograph.
+  const MEAL_TIMETABLE = {
+    Mon:[
+      ['Breakfast','Poha, Green Chutney','BREAKFAST','7FB2FF'],
+      ['Lunch','Chawal, Dal, Kabli Chana, Bhujia, Papad','LUNCH','67E0B0'],
+      ['Snacks','Chowmein, Milk Tea','SNACKS','C6A8FF'],
+      ['Dinner','Fried Rice (Basmati), Roti, Mix Veg, Milk','DINNER','7FB2FF']
+    ],
+    Tue:[
+      ['Breakfast','Roti, Matar Sabji','BREAKFAST','7FB2FF'],
+      ['Lunch','Chawal, Dal, Besan Sabji, Chokha, Papad','LUNCH','67E0B0'],
+      ['Snacks','Sattu Kachori, Nimbu Chai','SNACKS','C6A8FF'],
+      ['Dinner','Puri, Chana Masala, Kheer','DINNER','7FB2FF']
+    ],
+    Wed:[
+      ['Breakfast','Puri, Aalu Chana','BREAKFAST','7FB2FF'],
+      ['Lunch','Chawal, Dal, Bhujia, Seasonal Sabji, Papad','LUNCH','67E0B0'],
+      ['Snacks','Tikki Chaat, Milk Tea','SNACKS','C6A8FF'],
+      ['Dinner','Roti, Chawal, Anda Curry, Manchurian, Salad','DINNER','7FB2FF']
+    ],
+    Thu:[
+      ['Breakfast','Roti, Chana Dal','BREAKFAST','7FB2FF'],
+      ['Lunch','Chawal, Dal, Chokha, Seasonal Sabji, Papad','LUNCH','67E0B0'],
+      ['Snacks','Samosa, Tomato Sauce, Nimbu Chai','SNACKS','C6A8FF'],
+      ['Dinner','Jeera Normal Rice, Roti, Aalu Dal, Soyabin','DINNER','7FB2FF']
+    ],
+    Fri:[
+      ['Breakfast','Idli, Sambar, Chutney','BREAKFAST','7FB2FF'],
+      ['Lunch','Chawal, Dal, Bhujia, Seasonal Sabji, Papad','LUNCH','67E0B0'],
+      ['Snacks','Piyaj Pakodi, Tomato Sauce, Milk Tea','SNACKS','C6A8FF'],
+      ['Dinner','Roti, Rice, Dal, Paneer Masala / Chicken Masala','DINNER','7FB2FF']
+    ],
+    Sat:[
+      ['Breakfast','Roti, Kabli Chana','BREAKFAST','7FB2FF'],
+      ['Lunch','Khichdi, Chokha, Achar, Papad','LUNCH','67E0B0'],
+      ['Snacks','Litti Chokha, Lemon Tea','SNACKS','C6A8FF'],
+      ['Dinner','Fried Normal Rice, Seasonal Sabji, Roti, Tadka, Milk','DINNER','7FB2FF']
+    ],
+    Sun:[
+      ['Breakfast','Aalu Paratha (3 pcs), Chutney','BREAKFAST','7FB2FF'],
+      ['Lunch','Chawal, Dal, Bhujia, Aalu Chana, Papad','LUNCH','67E0B0'],
+      ['Snacks','Aalu Chop, Milk Tea','SNACKS','C6A8FF'],
+      ['Dinner','Roti, Rice, Chicken Masala, Soya Chilli, Salad','DINNER','7FB2FF']
+    ]
+  };
 
-      // map JS getDay() index -> our key
-      const JS_DAY_TO_KEY = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri' };
+  const DAY_NAMES={Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday'};
+  const DAY_KEYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const JS_DAY_TO_KEY={1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat',0:'Sun'};
+  const $=id=>document.getElementById(id);
+  const schedule=$('schedule');
+  let activeDay=null, activeView='class';
 
-      /* ============================================================
-         DOM REFERENCES
-         ============================================================ */
-      const nav         = document.querySelector('.day-nav');
-      const tiles       = Array.from(document.querySelectorAll('.day-tile'));
-      const dayTitle    = document.getElementById('dayTitle');
-      const dayCount    = document.getElementById('dayCount');
-      const scheduleEl  = document.getElementById('schedule');
-
-      const liveDayName = document.getElementById('liveDayName');
-      const liveFullDate = document.getElementById('liveFullDate');
-      const liveTime    = document.getElementById('liveTime');
-      const todayTag    = document.getElementById('todayTag');
-
-      let activeDay = null;
-
-      /* ============================================================
-         HELPERS
-         ============================================================ */
-      function pad(n) { return String(n).padStart(2, '0'); }
-
-      function getTodayKey() {
-        return JS_DAY_TO_KEY[new Date().getDay()] || null; // null on Sat/Sun
-      }
-
-      /* ============================================================
-         LIVE DATE + TIME
-         ============================================================ */
-      function updateLiveClock() {
-        const now = new Date();
-
-        // full weekday + date
-        const weekdayLong = now.toLocaleDateString(undefined, { weekday: 'long' });
-        const month = now.toLocaleDateString(undefined, { month: 'short' });
-        const dayNum = now.getDate();
-        const year = now.getFullYear();
-
-        liveDayName.textContent = weekdayLong;
-        liveFullDate.textContent = `${month} ${dayNum}, ${year}`;
-
-        // live time HH:MM
-        liveTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-        // weekend note on the tag
-        const todayKey = getTodayKey();
-        if (todayKey) {
-          todayTag.textContent = 'Today';
-          todayTag.style.opacity = '1';
-        } else {
-          todayTag.textContent = 'Weekend';
-          todayTag.style.opacity = '0.7';
-        }
-      }
-
-      /* ============================================================
-         CURRENT PERIOD DETECTION
-         ============================================================ */
-      function toMinutes(hhmm) {
-        const [h, m] = hhmm.split(':').map(Number);
-        return h * 60 + m;
-      }
-
-      function markCurrentPeriod(dayKey) {
-        const now = new Date();
-        const todayKey = getTodayKey();
-        const nowMin = now.getHours() * 60 + now.getMinutes();
-
-        // remove previous "now" markers
-        scheduleEl.querySelectorAll('.period.is-now').forEach(el => el.classList.remove('is-now'));
-
-        // only highlight if viewing today AND it's a weekday
-        if (dayKey !== todayKey) return;
-
-        const rows = TIMETABLE[dayKey] || [];
-        rows.forEach((r, idx) => {
-          const start = toMinutes(r.start);
-          const end = toMinutes(r.end);
-          if (nowMin >= start && nowMin < end) {
-            const cards = scheduleEl.querySelectorAll('.period');
-            if (cards[idx]) cards[idx].classList.add('is-now');
-          }
-        });
-      }
-
-      /* ============================================================
-         RENDER
-         ============================================================ */
-      function renderDay(dayKey) {
-        const rows = TIMETABLE[dayKey];
-        if (!rows) {
-          scheduleEl.innerHTML = '<div class="empty">No schedule available.</div>';
-          return;
-        }
-
-        dayTitle.textContent = DAY_FULL[dayKey] || dayKey;
-        const classCount = rows.filter(r => r.type !== 'recess').length;
-        dayCount.textContent = String(classCount);
-
-        let html = '';
-        rows.forEach((r, i) => {
-          const isRecess = r.type === 'recess';
-          const cls = isRecess ? 'period recess' : `period p-${r.type}`;
-
-          const teacherHtml = (!isRecess && r.teacher)
-            ? `<div class="teacher">${r.teacher}</div>`
-            : '';
-
-          html += `
-            <article class="${cls}" style="animation-delay:${i * 0.04}s">
-              <div class="slot">
-                <span class="pnum">${r.period}</span>
-                <span class="ptime">${r.time}</span>
-              </div>
-              <div class="body">
-                <div class="subj">
-                  <span>${r.subject}</span>
-                  ${r.abbr ? `<span class="tag">${r.abbr}</span>` : ''}
-                </div>
-                ${teacherHtml}
-              </div>
-            </article>
-          `;
-        });
-
-        scheduleEl.innerHTML = html;
-        markCurrentPeriod(dayKey);
-      }
-
-      /* ============================================================
-         STATE
-         ============================================================ */
-      function setActiveDay(dayKey) {
-        if (!TIMETABLE[dayKey]) dayKey = 'Mon';
-        if (dayKey === activeDay) return;
-
-        activeDay = dayKey;
-
-        tiles.forEach(tile => {
-          const on = tile.dataset.day === dayKey;
-          tile.classList.toggle('active', on);
-          tile.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-
-        renderDay(dayKey);
-      }
-
-      /* ============================================================
-         MARK "TODAY" TILE
-         ============================================================ */
-      function markTodayTile() {
-        const todayKey = getTodayKey();
-        tiles.forEach(tile => {
-          tile.classList.toggle('is-today', tile.dataset.day === todayKey);
-        });
-      }
-
-      /* ============================================================
-         EVENT DELEGATION
-         ============================================================ */
-      function bindNav() {
-        if (!nav) return;
-
-        nav.addEventListener('click', (event) => {
-          const tile = event.target.closest('.day-tile');
-          if (!tile) return;
-
-          const day = tile.dataset.day;
-          if (!day || !TIMETABLE[day]) return;
-
-          setActiveDay(day);
-        });
-      }
-
-      /* ============================================================
-         INIT
-         ============================================================ */
-      function init() {
-        updateLiveClock();
-        markTodayTile();
-
-        const todayKey = getTodayKey();
-        const initial = todayKey || 'Mon';
-
-        activeDay = null;
-        setActiveDay(initial);
-        bindNav();
-
-        // keep the clock fresh + re-check current period every 30s
-        setInterval(() => {
-          updateLiveClock();
-          if (activeDay) markCurrentPeriod(activeDay);
-        }, 30000);
-      }
-
-      init();
-    })();
+  function todayKey(){return JS_DAY_TO_KEY[new Date().getDay()];}
+  function updateClock(){
+    const now=new Date();
+    $('liveDayName').textContent=now.toLocaleDateString(undefined,{weekday:'long'});
+    $('liveFullDate').textContent=now.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+    $('liveTime').textContent=now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+    $('todayTag').textContent='Today';
+  }
+  function markToday(){
+    document.querySelectorAll('.day-tile').forEach(b=>b.classList.toggle('is-today',b.dataset.day===todayKey()));
+  }
+  function renderClass(day){
+    const rows=CLASS_TIMETABLE[day]||[];
+    $('dayCount').textContent=rows.filter(r=>r[4]!=='recess').length;
+    $('countLabel').textContent='classes';
+    $('footerLeft').textContent='PERIODS · 55 MIN';
+    $('footerRight').textContent='RECESS · 35 MIN';
+    if(!rows.length){schedule.innerHTML='<div class="empty">No class timetable available for this day.</div>';return;}
+    schedule.innerHTML=rows.map((r,i)=>{
+      const [period,time,subject,teacher,type,abbr]=r;
+      const recess=type==='recess';
+      return `<article class="period ${recess?'':'p-'+type}" style="animation-delay:${i*.04}s">
+        <div class="slot"><span class="pnum">${period}</span><span class="ptime">${time}</span></div>
+        <div class="body"><div class="subj"><span>${subject}</span><span class="tag">${abbr}</span></div>
+        ${teacher?`<div class="detail">${teacher}</div>`:''}</div></article>`;
+    }).join('');
+  }
+  function renderMeals(day){
+    const rows=MEAL_TIMETABLE[day]||[];
+    $('dayCount').textContent=rows.length;
+    $('countLabel').textContent='meals';
+    $('footerLeft').textContent='HOSTEL · WEEKLY FOOD ROUTINE';
+    $('footerRight').textContent='MENU SUBJECT TO CHANGE';
+    schedule.innerHTML=rows.map((r,i)=>{
+      const [meal,food,tag,color]=r;
+      const type=meal.toLowerCase();
+      return `<article class="period meal-card p-${type}" style="animation-delay:${i*.04}s">
+        <div class="slot"><span class="pnum">${meal}</span><span class="ptime">${['Breakfast','Lunch','Snacks','Dinner'].indexOf(meal)+1} / 4</span></div>
+        <div class="body"><div class="subj"><span>${food}</span><span class="tag">${tag}</span></div></div>
+      </article>`;
+    }).join('');
+  }
+  function render(){
+    $('dayTitle').textContent=DAY_NAMES[activeDay];
+    if(activeView==='class')renderClass(activeDay);else renderMeals(activeDay);
+  }
+  function setDay(day){
+    if(!DAY_KEYS.includes(day))return;
+    activeDay=day;
+    document.querySelectorAll('.day-tile').forEach(b=>{
+      const on=b.dataset.day===day;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on));
+    });
+    render();
+  }
+  function setView(view){
+    activeView=view;
+    document.querySelector('.app').dataset.view=view;
+    document.querySelectorAll('.main-tab').forEach(b=>{
+      const on=b.dataset.view===view;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on));
+    });
+    if(view==='class'){
+      $('pageHeading').innerHTML='Class <span>Timetable</span>';
+      $('pageSubtitle').textContent='Monday — Friday · BCA Semester 1';
+      $('pageBadge').textContent='BCA · SEM 1';
+      document.querySelectorAll('.day-tile').forEach(b=>b.hidden=!CLASS_TIMETABLE[b.dataset.day]);
+      if(!CLASS_TIMETABLE[activeDay])setDay('Mon');else render();
+    }else{
+      $('pageHeading').innerHTML='Hostel <span>Meal Plan</span>';
+      $('pageSubtitle').textContent='Monday — Sunday · Boys’ Hostel';
+      $('pageBadge').textContent='WEEKLY MENU';
+      document.querySelectorAll('.day-tile').forEach(b=>b.hidden=false);
+      render();
+    }
+  }
+  document.querySelector('.main-nav').addEventListener('click',e=>{
+    const button=e.target.closest('[data-view]');if(button)setView(button.dataset.view);
+  });
+  document.querySelector('.day-nav').addEventListener('click',e=>{
+    const button=e.target.closest('[data-day]');if(button&&!button.hidden)setDay(button.dataset.day);
+  });
+  updateClock();markToday();
+  setDay(todayKey());
+  if(!CLASS_TIMETABLE[activeDay])setDay('Mon');
+  setInterval(()=>{updateClock();markToday();},30000);
+})();
   </script>
 </body>
 </html>
